@@ -39,14 +39,18 @@ class Config(BaseModel, extra=Extra.forbid):
                 )
 
                 target_input: str = Prompt.ask(
-                    "Please enter the absolute path to the [bold]target file[/] where"
-                    " the highlights will be exported",
+                    "Please enter the absolute path to the [bold]target directory[/]"
+                    " where the highlights will be exported",
                     console=console,
                 )
 
                 try:
                     ereader_dir, target_dir = Path(ereader_input), Path(target_input)
 
+                except TypeError:  # User input cannot be converted into path
+                    console.print("[prompt.invalid]The inputs entered are not paths")
+
+                else:
                     if ereader_dir.is_absolute() and target_dir.is_absolute():
                         config = cls(
                             target_dir=Path(target_input),
@@ -59,9 +63,6 @@ class Config(BaseModel, extra=Extra.forbid):
                         console.print(
                             "[prompt.invalid]The paths entered are not absolute"
                         )
-
-                except TypeError:  # User input cannot be converted into path
-                    console.print("[prompt.invalid]The inputs entered are not paths")
 
     def save_file(self, config_path: Path) -> Config:
         with open(config_path, "w") as config_file:

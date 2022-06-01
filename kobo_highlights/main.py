@@ -1,40 +1,32 @@
-import code
-from .config import Config, ConfigError
-from .console import console, error_console
+# Imports:
+from pathlib import Path
+
 import typer
 from rich.prompt import Confirm
 from rich.panel import Panel
-from pathlib import Path
 
-app = typer.Typer()
+from .config import Config, ConfigError
+from .console import console, error_console
+from .functions import setup_config
+
+# Constants:
 APP_NAME = "kobo_highlights"
 CONFIG_PATH = Path(typer.get_app_dir(APP_NAME)) / "config.toml"
 
-try:
-    config = Config.from_file(CONFIG_PATH)
-
-# If the config file can't be read, ask to create one interactively.
-except ConfigError:
-    console.print("[bold]No valid configuration file was found")
-    if Confirm("would you like to create one?"):
-        config = Config.create_interactively().save_file(CONFIG_PATH)
-        console.print(
-            "[green]Configuration file created successfully:",
-            Panel(config, expand=False),
-            f"It has been saved in {CONFIG_PATH}",
-        )
-
-    else:
-        console.print("Kobo highlights can not work without a valid configuration file")
-        raise typer.Abort()
+# Initial setup:
+app = typer.Typer()
+config = setup_config(CONFIG_PATH)
 
 
 @app.command("config")
-def config_command(option: str = typer.Option("show", help="Config action to execute")):
+def config_command(
+    option: str = typer.Option("show", help="Config action to execute (show, new)")
+):
     """_summary_
 
     Args:
         command (str, optional): _description_. Defaults to typer.Option("show").
+
         help (str, optional): _description_. Defaults to "Config command to execute".
     """
 
@@ -54,11 +46,12 @@ def config_command(option: str = typer.Option("show", help="Config action to exe
     pass
 
 
-@app.command("import")
-def import_highlights(filename: str):
+@app.command("ls")
+def list_highlights(filename: str):
     typer.echo("test 2")
 
 
-@app.command()
-def add_all():
-    typer.echo("test 3")
+@app.command("import")
+def import_highlights(filename: str):
+    # import id, title, author, new, all
+    ...
