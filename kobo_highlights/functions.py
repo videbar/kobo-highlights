@@ -200,6 +200,50 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
     return all_bookmarks
 
 
+def add_bookmark_text_to_md(bookmark: Bookmark, md_dir: Path):
+    """This function adds a bookmark queried from the ereader database to a markdown
+    file. The filename of the file follows the convention
+    `<book title> - <book author(s)>.md`.
+
+    The bookmark is assumed to have a `text` key with a string value that represents the
+    bookmarked text and an `annotation` key that possibly holds the annotation text.
+    If there's no annotation text, it is assumed that the value of `annotation` is
+    `None`.
+
+    The text of the bookmark is added as a block quote and the annotation is added as
+    paragraphs underneath.
+
+    Args:
+        bookmark (dict[str, str]): The bookmark to be added. It has the keys `id`,
+        `text`, `annotation`, and `author`.
+
+        md_dir (Path): The path to the directory where the markdown files will be
+        stored.
+    """
+
+    md_filename: str = f"{bookmark['title']} - {bookmark['author']}.md"
+    md_filepath: Path = md_dir / md_filename
+
+    # Format the text as a markdown blockquote.
+    md_blockquote: str = f"> {bookmark['text']}".replace("\n", "\n> ")
+
+    # The format of the markdown text is a bit different depending on if it is creating
+    # a new file or of it is appending the bookmarks to an already existing file.
+    if annotation := bookmark["annotation"]:
+        text_new_file: str = f"{md_blockquote}\n\n{annotation}"
+        text_existing_file: str = f"\n\n***\n\n{md_blockquote}\n\n{annotation}"
+
+    else:
+        text_new_file: str = md_blockquote
+        text_existing_file: str = f"\n\n***\n\n{md_blockquote}"
+
+    if md_filepath.is_file():
+        with md_filepath.open("a") as md_file:
+            md_file.write(text_existing_file)
+    else:
+        md_filepath.write_text(text_new_file)
+
+
 # def add_bookmark_to_md_file(
 # bookmark: Bookmark, md_dir: Path, reload_annotations: bool = False
 # ):
@@ -234,46 +278,3 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
 
 # Format the text as a markdown blockquote.
 # md_blockquote: str = f"> {bookmark['text']}".replace("\n", "\n> ")
-
-
-def add_bookmark_text_to_md(bookmark: Bookmark, md_dir: Path):
-    """This function adds a bookmark queried from the ereader database to a markdown
-    file. The filename of the file follows the convention
-    `<book title> - <book author(s)>.md`.
-
-    The bookmark is assumed to have a `text` key with a string value that represents the
-    bookmarked text and an `annotation` key that possibly holds the annotation text.
-    If there's no annotation text, it is assumed that the value of `annotation` is
-    `None`.
-
-    The text of the bookmark is added as a block quote and the annotation is added as
-    paragraphs underneath.
-
-    Args:
-        bookmark (dict[str, str]): The bookmark to be added. It has the keys `id`,
-        `text`, `annotation`, and `author`.
-
-        md_dir (Path): The path to the directory where the markdown files will be
-        stored.
-    """
-
-    md_filename: str = f"{bookmark['title']} - {bookmark['author']}.md"
-    md_filepath: Path = md_dir / md_filename
-
-    # Format the text as a markdown blockquote.
-    md_blockquote: str = f"> {bookmark['text']}".replace("\n", "\n> ")
-
-    # The format of the markdown text is a bit different depending on if it is creating
-    # a new file or of it is appending the bookmarks to an already existing file.
-    text_new_file: str = f"{md_blockquote}\n" "\n" f"{bookmark['annotation']}"
-
-    text_existing_file: str = (
-        "\n" "\n" "***\n" "\n" f"{md_blockquote}\n" "\n" f"{bookmark['annotation']}"
-    )
-
-    if md_filepath.is_file():
-
-        with md_filepath.open("a") as md_file:
-            md_file.write(text_existing_file)
-    else:
-        md_filepath.write_text(text_new_file)
