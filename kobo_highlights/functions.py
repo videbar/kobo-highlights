@@ -88,6 +88,10 @@ def query_bookmarks_from_ereader(
     (UUID) of the bookmark, the book title and author, the highlighted text, and the
     annotations made.
 
+    The function will only query the bookmarks with text. It is possible to have
+    bookmarks without text, which correspond to pages which have been marked. This
+    function ignores those.
+
     The functions doesn't operate directly on the sqlite file, rather it creates a local
     copy and read from the copy. This way the program doesn't need to directly interact
     with the ereaderer database.
@@ -107,7 +111,10 @@ def query_bookmarks_from_ereader(
     cursor: sqlite3.Cursor = connection.cursor()
 
     # Query string used on the "Bookmark" table.
-    BM_QUERY: str = "SELECT UUID, Text, Annotation, VolumeID FROM 'Bookmark';"
+    BM_QUERY: str = (
+        "SELECT UUID, Text, Annotation, VolumeID FROM 'Bookmark'"
+        " WHERE Text IS NOT NULL;"
+    )
     all_bookmarks: list[dict[str, str]] = []
 
     for bookmark_data in cursor.execute(BM_QUERY):
@@ -127,7 +134,8 @@ def query_bookmarks_from_ereader(
         # "VolumeID" from the "Bookmark" table. It also has a column named "BookTitle"
         # that contains the title of the book.
 
-        # The structure of the volume id is: file:///internal/path/author_name/book.epub
+        # The structure of the volume id is:
+        # file:///internal/path/<author name>/book.epub
         volume_id: str = bookmark_data[3]
         current_bookmark["author"] = volume_id.rsplit("/", 2)[1]
 
@@ -200,7 +208,7 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
     return all_bookmarks
 
 
-def add_bookmark_text_to_md(bookmark: Bookmark, md_dir: Path):
+def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):
     """This function adds a bookmark queried from the ereader database to a markdown
     file. The filename of the file follows the convention
     `<book title> - <book author(s)>.md`.
@@ -240,41 +248,6 @@ def add_bookmark_text_to_md(bookmark: Bookmark, md_dir: Path):
     if md_filepath.is_file():
         with md_filepath.open("a") as md_file:
             md_file.write(text_existing_file)
+
     else:
         md_filepath.write_text(text_new_file)
-
-
-# def add_bookmark_to_md_file(
-# bookmark: Bookmark, md_dir: Path, reload_annotations: bool = False
-# ):
-#     """This function adds a bookmark queried from the ereader database to a markdown
-#     file. The filename of the file follows the convention
-#     `<book title> - <book author(s)>.md`. The text of the bookmark is added as a block
-#     quote and the annotation is added as paragraphs underneath.
-
-#     Args:
-#         bookmark (dict[str, str]): The bookmark to be added. It has the keys `id`,
-#         `text`, `annotation`, and `author`.
-
-#         md_dir (Path): The path to the directory where the markdown files will be
-#         stored.
-#     """
-#     file_name: str = f"{bookmark['title']} - {bookmark['author']}.md"
-
-#     match bookmark:
-
-#         case {"text": str() as text, "annotation": None}:
-#             bm_text_to_md(bookmark, )
-
-#         case {"text": str() as text, "annotation": str() as annotation}:
-#             ...
-
-#         case {"text": None, "annotation": None}:
-#             pass
-
-#         case _:
-#             ...
-
-
-# Format the text as a markdown blockquote.
-# md_blockquote: str = f"> {bookmark['text']}".replace("\n", "\n> ")
