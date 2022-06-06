@@ -27,7 +27,7 @@ from .console import console, error_console
 
 
 # Type alias:
-Bookmark = dict[str, str]
+Bookmark = dict[str, str | None]
 
 
 # Functions:
@@ -108,16 +108,19 @@ def query_bookmarks_from_ereader(
     local_sqlite: Path = Path(copy(sqlite_filepath, copy_dir))
 
     connection: sqlite3.Connection = sqlite3.connect(local_sqlite)
-    cursor: sqlite3.Cursor = connection.cursor()
+    # Two cursors are require since two tables of the same database will be queried
+    # alternatively in a for loop.
+    cursor_bookmark: sqlite3.Cursor = connection.cursor()
+    cursor_content: sqlite3.Cursor = connection.cursor()
 
     # Query string used on the "Bookmark" table.
     BM_QUERY: str = (
-        "SELECT UUID, Text, Annotation, VolumeID FROM 'Bookmark'"
+        "SELECT UUID, Text, Annotation, VolumeID FROM Bookmark"
         " WHERE Text IS NOT NULL;"
     )
-    all_bookmarks: list[dict[str, str]] = []
+    all_bookmarks: list[Bookmark] = []
 
-    for bookmark_data in cursor.execute(BM_QUERY):
+    for bookmark_data in cursor_bookmark.execute(BM_QUERY):
 
         current_bookmark: dict = {
             "id": bookmark_data[0],
@@ -136,17 +139,23 @@ def query_bookmarks_from_ereader(
 
         # The structure of the volume id is:
         # file:///internal/path/<author name>/book.epub
+        # In order to obtain the author, first the string between the two right-most
+        # slashes (/) is retrieved, then the underscores are removed, since Kobo uses
+        # them instead of dots for author's initials, and finally, the " - " is removed,
+        # since it would conflict with the convention used by the program for filenames.
         volume_id: str = bookmark_data[3]
-        current_bookmark["author"] = volume_id.rsplit("/", 2)[1]
+        current_bookmark["author"] = (
+            volume_id.rsplit("/", 2)[1].replace("_", "").replace(" - ", "-")
+        )
 
         # Query string used on the "content" table.
         CONTENT_QUERY: str = (
-            f"SELECT BookTitle FROM 'content' WHERE BookID = {volume_id} LIMIT 1;"
+            f"SELECT BookTitle FROM content WHERE BookID = '{volume_id}' LIMIT 1;"
         )
 
         # The same book can appear multiple times on the "content" table, but in order
         # to retrieve the title there's no need to query more than one result.
-        current_bookmark["title"] = cursor.execute(CONTENT_QUERY).fetchone()[0]
+        current_bookmark["title"] = cursor_content.execute(CONTENT_QUERY).fetchone()[0]
 
         all_bookmarks.append(current_bookmark)
 
@@ -180,9 +189,9 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
         list[dict[str, str]]: List of the bookmarks found.
     """
 
-    all_bookmarks: list[dict[str, str]] = []
+    all_bookmarks: list[Bookmark] = []
 
-    # The regex used in glob() matches filenames corresponding to bookmark markdown
+    # The expression used in glob() matches filenames corresponding to bookmark markdown
     # files.
     for md_filepath in dir_md_files.glob("* - *.md"):
 
@@ -193,7 +202,7 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
         current_title, current_author = current_filename.rsplit(" - ", 1)
 
         html_text: str = gfm(md_filepath.read_text())
-        soup = BeautifulSoup(html_text)
+        soup = BeautifulSoup(html_text, "html.parser")
 
         for blockquote in soup("blockquote"):
             current_bookmark = {
@@ -238,11 +247,11 @@ def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):
     # The format of the markdown text is a bit different depending on if it is creating
     # a new file or of it is appending the bookmarks to an already existing file.
     if annotation := bookmark["annotation"]:
-        text_new_file: str = f"{md_blockquote}\n\n{annotation}"
+        text_new_file: str = f"\n{md_blockquote}\n\n{annotation}"
         text_existing_file: str = f"\n\n***\n\n{md_blockquote}\n\n{annotation}"
 
     else:
-        text_new_file: str = md_blockquote
+        text_new_file: str = f"\n{md_blockquote}"
         text_existing_file: str = f"\n\n***\n\n{md_blockquote}"
 
     if md_filepath.is_file():

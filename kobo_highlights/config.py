@@ -1,11 +1,14 @@
+# Imports:
 from __future__ import annotations
-from .console import console
 from pathlib import Path
+
 from pydantic import BaseModel, Extra, ValidationError, validate_arguments
 from rich.prompt import Prompt
 from rich.panel import Panel
 from rich.table import Table
 import toml
+
+from .console import console
 
 
 class Config(BaseModel, extra=Extra.forbid):
