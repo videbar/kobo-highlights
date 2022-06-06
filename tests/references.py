@@ -15,6 +15,22 @@ should look when queried.
 that ships with the tests.
 """
 
+CONFIG_FILE_CORRECT: str = (
+    'ereader_dir = "/absolute/path/to/ereader"\n'
+    'target_dir = "/absolute/path/to/markdown/dir"'
+)
+CONFIG_FILE_CORRECT_PATHS: dict[str, str] = {
+    "ereader_dir": "/absolute/path/to/ereader",
+    "target_dir": "/absolute/path/to/markdown/dir",
+}
+CONFIG_FILE_EXTRA_FIELDS: str = (
+    'kobo_ereader_path = "/absolute/path/to/ereader"\n'
+    'kobo_target_folder = "/absolute/path/to/markdown/dir"\n'
+    'kobo_extra_path = "/this/path/should/not/exist"'
+)
+CONFIG_FILE_MISSING_FIELDS: str = 'kobo_ereader_path = "/absolute/path/to/ereader"'
+
+
 BOOKMARKS_TO_ADD: list[dict] = [
     {
         "id": "11111111-111111111-11111111111111111",
@@ -37,6 +53,7 @@ BOOKMARKS_TO_ADD: list[dict] = [
     },
 ]
 
+
 REFERENCE_MARKDOWN = [
     "\n> I am a bookmark with multiple lines.\n> I continue here",
     (
@@ -53,6 +70,7 @@ REFERENCE_MARKDOWN = [
     ),
 ]
 
+
 BOOKMARKS_QUERIED_FROM_MD: list[dict] = [
     {
         "text": "I am a bookmark with multiple lines.\nI continue here",
@@ -65,6 +83,7 @@ BOOKMARKS_QUERIED_FROM_MD: list[dict] = [
         "title": "Book title with a - in the middle",
     },
 ]
+
 
 # This list contains the bookmarks that are inside the reference sqlite file that is
 # shipped with the tests and is used to test the sqlite query function.

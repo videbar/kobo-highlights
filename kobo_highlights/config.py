@@ -8,7 +8,7 @@ from rich.panel import Panel
 from rich.table import Table
 import toml
 
-from .console import console
+from kobo_highlights.console import console
 
 
 class Config(BaseModel, extra=Extra.forbid):
@@ -34,42 +34,44 @@ class Config(BaseModel, extra=Extra.forbid):
     @classmethod
     def create_interactively(cls) -> Config:
         while True:
-            while True:
-                ereader_input: str = Prompt.ask(
-                    "Please enter the absolute path where your [bold]ereader[/] is"
-                    " mounted",
-                    console=console,
-                )
+            ereader_input: str = Prompt.ask(
+                "Please enter the absolute path where your [bold]ereader[/] is"
+                " mounted",
+                console=console,
+            )
 
-                target_input: str = Prompt.ask(
-                    "Please enter the absolute path to the [bold]target directory[/]"
-                    " where the highlights will be exported",
-                    console=console,
-                )
+            target_input: str = Prompt.ask(
+                "Please enter the absolute path to the [bold]target directory[/]"
+                " where the highlights will be exported",
+                console=console,
+            )
 
-                try:
-                    ereader_dir, target_dir = Path(ereader_input), Path(target_input)
+            try:
+                ereader_dir, target_dir = Path(ereader_input), Path(target_input)
 
-                except TypeError:  # User input cannot be converted into path
-                    console.print("[prompt.invalid]The inputs entered are not paths")
+            except TypeError:  # User input cannot be converted into path
+                console.print("[prompt.invalid]The inputs entered are not paths")
+
+            else:
+                if ereader_dir.is_absolute() and target_dir.is_absolute():
+                    config = cls(
+                        target_dir=Path(target_input),
+                        ereader_dir=Path(ereader_dir),
+                    )
+
+                    return config
 
                 else:
-                    if ereader_dir.is_absolute() and target_dir.is_absolute():
-                        config = cls(
-                            target_dir=Path(target_input),
-                            ereader_dir=Path(ereader_dir),
-                        )
+                    console.print("[prompt.invalid]The paths entered are not absolute")
 
-                        return config
+    def save_file(self, config_filepath: Path) -> Config:
+        # Convert the path attributes to strings:
+        toml_representation: dict[str, str] = {
+            field: str(path) for field, path in self.dict().items()
+        }
 
-                    else:
-                        console.print(
-                            "[prompt.invalid]The paths entered are not absolute"
-                        )
-
-    def save_file(self, config_path: Path) -> Config:
-        with open(config_path, "w") as config_file:
-            toml.dump(self.dict(), config_file)
+        with open(config_filepath, "w") as config_file:
+            toml.dump(toml_representation, config_file)
 
         return self
 

@@ -20,6 +20,8 @@ created when a config file exists.
 * test_setup_config_file_exist:Tests the that a proper `Config` object is created when a
 config file doesn't exist.
 """
+
+# Imports:
 from pathlib import Path
 from unittest.mock import patch, mock_open
 
@@ -179,21 +181,4 @@ def test_setup_config_file_doesnt_exist(tmp_path):
     ):
 
         mock_config_from_file.side_effect = ConfigError("No config file")
-        assert setup_config(config_filpath) == return_config
-
-
-def test_setup_config_file_exist(tmp_path):
-    """Test that the function `setup_config()` produces a proper config object when
-    the config file exists. Notably, this test doesn't test the inner logic from the
-    `Config` class, that is done in `test_config.py`, here the entire functionality
-    of `Config` is mocked.
-    """
-
-    ereader_dir: Path = tmp_path / "ereader"
-    target_dir: Path = tmp_path / "target"
-    config_filpath: Path = tmp_path / "config.toml"
-
-    return_config = Config(ereader_dir=ereader_dir, target_dir=target_dir)
-
-    with patch.object(Config, "from_file", return_value=return_config):
         assert setup_config(config_filpath) == return_config

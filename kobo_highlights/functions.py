@@ -22,8 +22,8 @@ from rich.panel import Panel
 from marko.ext.gfm import gfm
 from bs4 import BeautifulSoup
 
-from .config import Config, ConfigError
-from .console import console, error_console
+from kobo_highlights.config import Config, ConfigError
+from kobo_highlights.console import console, error_console
 
 
 # Type alias:

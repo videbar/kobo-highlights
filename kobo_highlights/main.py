@@ -6,9 +6,9 @@ from rich.panel import Panel
 from rich.table import Table
 from rich import box
 
-from .config import Config
-from .console import console, error_console
-from .functions import (
+from kobo_highlights.config import Config
+from kobo_highlights.console import console, error_console
+from kobo_highlights.functions import (
     setup_config,
     query_bookmarks_from_ereader,
     query_bookmarks_from_markdown,
@@ -16,7 +16,7 @@ from .functions import (
 )
 
 # Type alias:
-Bookmark = dict[str, str]
+Bookmark = dict[str, str | None]
 
 # Initial setup:
 APP_NAME: str = "kobo_highlights"
