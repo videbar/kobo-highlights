@@ -22,25 +22,25 @@ app = typer.Typer()
 # Initial setup:
 @app.callback()
 def setup():
-    APP_NAME: str = "kobo_highlights"
-
+    # Global variables:
     global APP_PATH
-    APP_PATH: Path = Path(typer.get_app_dir(APP_NAME))
-
     global CONFIG_PATH
-    CONFIG_PATH: Path = APP_PATH / "config.toml"
-
     global config
+    global SQLITE_PATH
+
+    APP_NAME: str = "kobo_highlights"
+    APP_PATH = Path(typer.get_app_dir(APP_NAME))
+    CONFIG_PATH = APP_PATH / "config.toml"
+
     try:
         config = Config.from_file(CONFIG_PATH)
 
     # If the config file can't be read, ask to create one interactively.
     except ConfigError:
-        config: Config = setup_missing_config(CONFIG_PATH)
+        config = setup_missing_config(CONFIG_PATH)
         raise typer.Exit()
 
-    global SQLITE_PATH
-    SQLITE_PATH: Path = config.ereader_dir / ".kobo/KoboReader.sqlite"
+    SQLITE_PATH = config.ereader_dir / ".kobo/KoboReader.sqlite"
 
 
 @app.command("config")
@@ -60,7 +60,7 @@ def config_command(
     global config
     match config_subcomand:
         case "show":
-            console.print(Panel(config, expand=False, title=str(CONFIG_PATH)))
+            console.print(Panel(config, expand=False))
 
         case "new":
             config = Config.create_interactively().save_file(CONFIG_PATH)
@@ -69,8 +69,6 @@ def config_command(
         case _:
             error_console.print(f"Unknown option: {config_subcomand}")
             raise typer.Exit(1)
-
-    pass
 
 
 @app.command("ls")

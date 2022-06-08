@@ -50,7 +50,7 @@ def setup_missing_config(config_path: Path) -> Config:
     """
 
     error_console.print("[bold]No valid configuration file was found")
-    if Confirm("would you like to create one?"):
+    if Confirm.ask("would you like to create one?"):
 
         try:
             config = Config.create_interactively().save_file(config_path)

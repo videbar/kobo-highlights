@@ -20,7 +20,10 @@ config file exists.
 
 # Imports:
 from pathlib import Path
+from unittest import mock
 from unittest.mock import patch, mock_open
+
+from rich.prompt import Confirm
 
 from .references import (
     BOOKMARKS_TO_ADD,
@@ -33,8 +36,10 @@ from kobo_highlights.functions import (
     query_bookmarks_from_ereader,
     query_bookmarks_from_markdown,
     add_bookmark_to_md,
+    console,
+    Config,
+    ConfigError,
 )
-from kobo_highlights.config import Config, ConfigError
 
 
 def test_query_bookmarks_from_ereader(tmp_path):
@@ -170,12 +175,20 @@ def test_setup_missing_config(tmp_path):
     target_dir: Path = tmp_path / "target"
     config_filpath: Path = tmp_path / "config.toml"
 
-    return_config = Config(ereader_dir=ereader_dir, target_dir=target_dir)
+    reference_config = Config(ereader_dir=ereader_dir, target_dir=target_dir)
 
     with (
-        patch.object(Config, "from_file") as mock_config_from_file,
-        patch.object(Config, "create_interactively", return_value=return_config),
+        patch.object(Confirm, "ask", return_value=True) as mock_ask,
+        patch.object(console, "print") as mock_print,
+        patch.object(
+            Config, "create_interactively", return_value=reference_config
+        ) as mock_create_interactively,
     ):
 
-        mock_config_from_file.side_effect = ConfigError("No config file")
-        assert setup_missing_config(config_filpath) == return_config
+        return_config = setup_missing_config(config_filpath)
+
+        assert reference_config == return_config
+
+        mock_ask.assert_called_once()
+        mock_create_interactively.assert_called()
+        mock_print.assert_called_once()
