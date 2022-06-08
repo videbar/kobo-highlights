@@ -1,8 +1,8 @@
 """This module contains some logic that is require by the application but is not
 directly related to the CLI. This includes:
 
-* setup_config(): Called at the beginning of the program to ensure there's a proper
-Config instance.
+* setup_missing_config(): Called at the beginning of the program when a valid config
+file is not found
 
 * query_bookmarks_from_ereader(): Query the ereader database to get a list of all the
 bookmarks.
@@ -22,7 +22,7 @@ from rich.panel import Panel
 from marko.ext.gfm import gfm
 from bs4 import BeautifulSoup
 
-from kobo_highlights.config import Config, ConfigError
+from kobo_highlights.config import Config
 from kobo_highlights.console import console, error_console
 
 
@@ -32,21 +32,17 @@ Bookmark = dict[str, str | None]
 
 # Functions:
 def setup_missing_config(config_path: Path) -> Config:
-    """This function is used to set up the configuration object that is used by the
-    program. It tries to find a valid configuration file and use to it to create
-    the config object. If it fails to find a file, or if the file is not valid,
-    it prompts the user to create a new config object interactively and it saves it
-    as a config file.
-
-    The function returns a config variable of the Config type. This variable is used
-    as a singleton, although this behavior is not "enforced".
-
+    """This function called at the beginning of the program when a valid configuration
+    file cannot be found. It asks the user to create a new `Config` object interactively
+    and, if an object is created, it is used to create a new config file.
+    
     Args:
-        config_path (Path): Path to the config file.
+        config_path (Path): Path where the config file will be created.
 
     Raises:
-        typer.Abort: In case the function finds an error that cannot be solved, it
-        raises a typer.Abort to stop the program.
+        typer.Abort: If the user doesn't want to create a `Config` object, or if the
+        resulting configuration can't be saved as a config file, a `typer.Abort`
+        exception is raised to stop the program.
     """
 
     error_console.print("[bold]No valid configuration file was found")
@@ -86,20 +82,29 @@ def query_bookmarks_from_ereader(
     bookmarks without text, which correspond to pages which have been marked. This
     function ignores those.
 
-    The functions doesn't operate directly on the sqlite file, rather it creates a local
-    copy and read from the copy. This way the program doesn't need to directly interact
+    The function doesn't operate directly on the sqlite file, rather it creates a local
+    copy and reads from the copy. This way the program doesn't need to directly interact
     with the ereaderer database.
 
     Args:
         sqlite_filepath (Path): Path to the ereader sqlite database.
 
-        copy_dir (Path): Directory where database is copied to.
+        copy_dir (Path): Directory where the local copy of the database is created.
 
     Returns:
-        list[dict[str, str]]: List of bookmarks.
+        list[dict[str, str | None]]: List of bookmarks.
     """
 
-    local_sqlite: Path = Path(copy(sqlite_filepath, copy_dir))
+    try:
+        local_sqlite: Path = Path(copy(sqlite_filepath, copy_dir))
+
+    except FileNotFoundError:
+        error_console.print(
+            "Error: It was not possible to connect to the erader"
+            " database. Make sure that is is connected and that your configuration is"
+            " correct (run kh config show)."
+        )
+        raise typer.Abort()
 
     connection: sqlite3.Connection = sqlite3.connect(local_sqlite)
     # Two cursors are require since two tables of the same database will be queried
@@ -118,7 +123,7 @@ def query_bookmarks_from_ereader(
 
         current_bookmark: dict = {
             "id": bookmark_data[0],
-            "text": bookmark_data[1],
+            "text": bookmark_data[1].strip(),
             "annotation": bookmark_data[2],
         }
 
@@ -162,7 +167,7 @@ def query_bookmarks_from_ereader(
 def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
     """This function reads all the markdown files in a given directory and extract
     bookmarks that were already exported. It first parses the markdown into html and
-    then it uses beautiful soup to scrap the bookmarks.
+    then it uses the beautiful soup library to scrap the bookmarks.
 
     This is non-exhaustive basic parser, it only looks for markdown files with names
     that match the ones created by the program and extract all blockquotes from this.
@@ -171,10 +176,10 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
 
     This simple behaviour is enough for two reasons. First, this parser will only be
     used to check if the bookmarks queried from the ereader database are already stored
-    as markdown, so false positives are not a problem. Second, the fact that when
-    bookmarks are extracted from blockquotes only the plaintext is consider make it
-    possible for users to, for example, emphasis the text in the bookmark without the
-    parser noticing.
+    as markdown, so false positives are not a problem. Second, when bookmarks are
+    extracted from blockquotes only the plaintext is consider to make it possible for
+    users to, for example, emphasis the text in the bookmark without the parser
+    noticing.
 
     Args:
         dir_md_files (Path): Directory containing the markdown files.
@@ -203,7 +208,7 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
                 "author": current_author,
                 "title": current_title,
                 # BeautifulSoup adds leading and trailing "\n" which need to be striped.
-                "text": blockquote.text.strip("\n"),
+                "text": blockquote.text[1:-1],
             }
 
             all_bookmarks.append(current_bookmark)
@@ -213,7 +218,7 @@ def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
 
 def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):
     """This function adds a bookmark queried from the ereader database to a markdown
-    file. The filename of the file follows the convention
+    file. The filename of the markdown file follows the convention
     `<book title> - <book author(s)>.md`.
 
     The bookmark is assumed to have a `text` key with a string value that represents the

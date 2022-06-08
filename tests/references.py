@@ -1,18 +1,30 @@
-"""This simple module contains references used in the tests:
+"""This simple module contains some reference variables used in the tests:
 
-* BOOKMARKS_TO_ADD: A list of bookmarks that, when imported to markdown, would result
-in the REFERENCE_MARKDOWN document.
+* CONFIG_FILE_CORRECT (str): Contents of a valid configuration file.
 
-* REFERENCE_MARKDOWN: A list of reference markdown text that results from importing the
-bookmarks in BOOKMARKS_TO_ADD. The list contains two markdown documents, one corresponds
-to the first bookmark in BOOKMARKS_TO_ADD being imported and the second one corresponds
-to the second bookmark in BOOKMARKS_TO_ADD being imported to a file that already exists.
+* CONFIG_FILE_CORRECT_PATHS (dict[str, str]): dictionary that contains a string
+representation of the paths from `CONFIG_FILE_CORRECT`.
 
-* BOOKMARKS_QUERIED_FROM_MD: A list of how the two bookmarks in REFERENCE_MARKDOWN
-should look when queried.
+* CONFIG_FILE_EXTRA_FIELDS (str): Contents of a configuration file with extra extra
+arguments.
 
-* EXPECTED_BOOKMARKS_SQLITE: A list of the bookmarks contained in the sqlite file
-that ships with the tests.
+* CONFIG_FILE_MISSING_FIELDS (str): Contents of a configuration file with missing
+arguments.
+
+* BOOKMARKS_TO_ADD (list[dict]): A list of bookmarks that, when imported to markdown,
+would result in the REFERENCE_MARKDOWN document.
+
+* REFERENCE_MARKDOWN (list): A list of reference markdown text that results from
+importing the bookmarks in `BOOKMARKS_TO_ADD`. The list contains two markdown documents,
+one corresponds to the first bookmark in `BOOKMARKS_TO_ADD` being imported and the
+second one corresponds to the second bookmark in `BOOKMARKS_TO_ADD` being imported to a
+file that already exists.
+
+* BOOKMARKS_QUERIED_FROM_MD (list[dict]):  A list of how the two bookmarks in
+`REFERENCE_MARKDOWN` should look when queried.
+
+* EXPECTED_BOOKMARKS_SQLITE (list[dict]): A list of the bookmarks contained in the
+sqlite file that ships with the tests (`KoboReader.sqlite`).
 """
 
 CONFIG_FILE_CORRECT: str = (

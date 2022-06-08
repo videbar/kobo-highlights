@@ -1,5 +1,4 @@
-"""This module contains tests for the functionality in `functions.py`. It contains
-the following tests:
+"""Tests for the functionality in `functions.py`:
 
 * test_query_bookmarks_from_ereader: Tests the querying of bookmarks from the erader
 sqlite database.
@@ -15,7 +14,7 @@ file.
 name are ignored when querying the bookmarks.
 
 * test_setup_missing_config: Tests the that a proper `Config` object is created when a
-config file exists.
+config file doesn't exists.
 """
 
 # Imports:
@@ -43,35 +42,32 @@ from kobo_highlights.functions import (
 
 
 def test_query_bookmarks_from_ereader(tmp_path):
-    """Use a pre-defined sqlite file shipped with the tests to check that the query
-    functionality works as expected. The pytest temporary path `tmp_path` is used as
-    the local directory in which the database is copied.
+    """Tests the querying of bookmarks from the erader sqlite database. To do so, a
+    pre-defined sqlite file is shipped with the tests (`KoboReader.sqlite`) as well as
+    what the result of the querying should look like (`EXPECTED_BOOKMARKS_SQLITE`).
     """
 
-    TEST_ROOT: Path = Path(__file__).parent
-    # Fake ereader directory:
-    SQLITE_FILEPATH: Path = TEST_ROOT / "KoboReader.sqlite"
+    test_root: Path = Path(__file__).parent
+    # fake ereader directory:
+    sqlite_filepath: Path = test_root / "koboreader.sqlite"
 
-    # Fake local dir for the copy of the database:
-    LOCAL_DIR: Path = tmp_path
+    # fake local dir for the copy of the database:
+    local_dir: Path = tmp_path
 
-    assert not (LOCAL_DIR / "KoboReader.sqlite").is_file()
+    assert not (local_dir / "koboreader.sqlite").is_file()
 
     queried_bookmarks: list[dict] = query_bookmarks_from_ereader(
-        SQLITE_FILEPATH, LOCAL_DIR
+        sqlite_filepath, local_dir
     )
 
-    assert queried_bookmarks == EXPECTED_BOOKMARKS_SQLITE
-    assert not (LOCAL_DIR / "KoboReader.sqlite").is_file()
+    assert queried_bookmarks == expected_bookmarks_sqlite
+    assert not (local_dir / "koboreader.sqlite").is_file()
 
 
 def test_add_bookmark_to_md_new(tmp_path):
-    """Test adding bookmarks to a markdown file that doesn't previously exist. This test
-    uses the first bookmark contained in`BOOKMARKS_TO_ADD`. The resulting markdown text
-    should be the first string from `REFERENCE_MARKDOWN`.
-
-    The function is called on a mocked file and then it is checked that the proper
-    write methods were called with the markdown content from `REFERENCE_MARKDOWN`.
+    """Tests adding a bookmark to a new markdown file. This test uses the first bookmark
+    contained in`bookmarks_to_add`. The resulting markdown text should be the first
+    string from `REFERENCE_MARKDOWN`.
     """
 
     # Name of the markdown file from the bookmark characteristics.
@@ -93,13 +89,11 @@ def test_add_bookmark_to_md_new(tmp_path):
 
 
 def test_add_bookmark_to_md_existing(tmp_path):
-    """Test adding bookmarks to a markdown file that already exists. This test uses the
-    second bookmark contained in`BOOKMARKS_TO_ADD`. The resulting markdown text
-    should be the second string from `REFERENCE_MARKDOWN`.
-
-    The function is called on a mocked file and then it is checked that the proper
-    write methods were called with the markdown content from `REFERENCE_MARKDOWN`.
+    """Tests adding a bookmark to an existing markdown This test uses the second
+    bookmark contained in`BOOKMARKS_TO_ADD`. The resulting markdown text should be the
+    second string from `REFERENCE_MARKDOWN`.
     """
+
     filename: str = (
         f"{BOOKMARKS_TO_ADD[1]['title']} - {BOOKMARKS_TO_ADD[1]['author']}.md"
     )
@@ -119,12 +113,9 @@ def test_add_bookmark_to_md_existing(tmp_path):
 
 
 def test_query_bookmarks_from_markdown(tmp_path):
-    """Test that bookmarks are properly queried from markdown documents. To do so,
-    a markdown file is created under the temporal path `tmp_path` with the contents
-    from `REFERENCE_MARKDOWN`.
-
-    The function `query_bookmarks_from_markdown()` is then applied and the results are
-    compared with the reference `BOOKMARKS_QUERIED_FROM_MD`.
+    """Tests querying the bookmarks from markdown files. This test uses the contents
+    from `REFERENCE_MARKDOWN`, which should result in the bookmarks in
+    `BOOKMARKS_QUERIED_FROM_MD`.
     """
 
     complete_markdown: str = REFERENCE_MARKDOWN[0] + REFERENCE_MARKDOWN[1]
@@ -142,11 +133,11 @@ def test_query_bookmarks_from_markdown(tmp_path):
 
 
 def test_query_bookmarks_from_markdown_ignore(tmp_path):
-    """Test that the function `query_bookmarks_from_markdown` ignores files without
-    the right filename. To do so three markdown files are created under the temporal
-    path `tmp_path` with slightly wrong names (according to the convention). The files
-    contain proper bookmarks (from REFERENCE_MARKDOWN), but because of the filename
-    they should be ignored by `query_bookmarks_from_markdown`.
+    """Tests that markdown files without a proper name are ignored when querying the
+    bookmarks. To do so three markdown files are created with slightly wrong names
+    (according to the convention). The files contain proper bookmarks
+    (from REFERENCE_MARKDOWN), but because of the filename they should be ignored by
+    `query_bookmarks_from_markdown()`.
     """
 
     complete_markdown: str = REFERENCE_MARKDOWN[0] + REFERENCE_MARKDOWN[1]
@@ -165,10 +156,10 @@ def test_query_bookmarks_from_markdown_ignore(tmp_path):
 
 
 def test_setup_missing_config(tmp_path):
-    """Test that the function `setup_config()` produces a proper config object when
-    the config file doesn't exists. Notably, this test doesn't test the inner logic from
-    the `Config` class, that is done in `test_config.py`, here the entire functionality
-    of `Config` is mocked.
+    """Tests the that a proper `Config` object is created when a config file doesn't
+    exists. Notably, this test doesn't test the inner logic from the `Config` class,
+    that is done in `test_config.py`, here the entire functionality of `Config` is
+    mocked.
     """
 
     ereader_dir: Path = tmp_path / "ereader"

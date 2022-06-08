@@ -1,14 +1,23 @@
 [tool.poetry]
 name = "kobo-highlights"
 version = "0.1.0"
-description = ""
+description = """\
+    Kobo Highlights is a CLI application to manage the bookmarks of your Kobo ereader. \
+    It can import them into a human-friendly markdown database.\
+    """
 authors = ["Pedro Videgain Barranco"]
+readme = "README.md"
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Multimedia",
+]
 
 [tool.poetry.scripts]
 kh = "kobo_highlights.main:app"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 typer = {extras = ["all"], version = "^0.4.1"}
 toml = "^0.10.2"
 pydantic = "^1.9.0"
