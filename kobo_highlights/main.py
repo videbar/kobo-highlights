@@ -6,10 +6,10 @@ from rich.panel import Panel
 from rich.table import Table
 from rich import box
 
-from kobo_highlights.config import Config
+from kobo_highlights.config import Config, ConfigError
 from kobo_highlights.console import console, error_console
 from kobo_highlights.functions import (
-    setup_config,
+    setup_missing_config,
     query_bookmarks_from_ereader,
     query_bookmarks_from_markdown,
     add_bookmark_to_md,
@@ -17,15 +17,30 @@ from kobo_highlights.functions import (
 
 # Type alias:
 Bookmark = dict[str, str | None]
+app = typer.Typer()
 
 # Initial setup:
-APP_NAME: str = "kobo_highlights"
-APP_PATH: Path = Path(typer.get_app_dir(APP_NAME))
-CONFIG_PATH: Path = APP_PATH / "config.toml"
+@app.callback()
+def setup():
+    APP_NAME: str = "kobo_highlights"
 
-app = typer.Typer()
-config: Config = setup_config(CONFIG_PATH)
-SQLITE_PATH: Path = config.ereader_dir / ".kobo/KoboReader.sqlite"
+    global APP_PATH
+    APP_PATH: Path = Path(typer.get_app_dir(APP_NAME))
+
+    global CONFIG_PATH
+    CONFIG_PATH: Path = APP_PATH / "config.toml"
+
+    global config
+    try:
+        config = Config.from_file(CONFIG_PATH)
+
+    # If the config file can't be read, ask to create one interactively.
+    except ConfigError:
+        config: Config = setup_missing_config(CONFIG_PATH)
+        raise typer.Exit()
+
+    global SQLITE_PATH
+    SQLITE_PATH: Path = config.ereader_dir / ".kobo/KoboReader.sqlite"
 
 
 @app.command("config")

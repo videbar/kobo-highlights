@@ -14,11 +14,8 @@ file.
 * test_query_bookmarks_from_markdown_ignore: Tests that markdown files without a proper
 name are ignored when querying the bookmarks.
 
-* test_setup_config_file_doesnt_exist: Tests the that a proper `Config` object is
-created when a config file exists.
-
-* test_setup_config_file_exist:Tests the that a proper `Config` object is created when a
-config file doesn't exist.
+* test_setup_missing_config: Tests the that a proper `Config` object is created when a
+config file exists.
 """
 
 # Imports:
@@ -32,7 +29,7 @@ from .references import (
     EXPECTED_BOOKMARKS_SQLITE,
 )
 from kobo_highlights.functions import (
-    setup_config,
+    setup_missing_config,
     query_bookmarks_from_ereader,
     query_bookmarks_from_markdown,
     add_bookmark_to_md,
@@ -162,7 +159,7 @@ def test_query_bookmarks_from_markdown_ignore(tmp_path):
     assert queried_bookmarks == []
 
 
-def test_setup_config_file_doesnt_exist(tmp_path):
+def test_setup_missing_config(tmp_path):
     """Test that the function `setup_config()` produces a proper config object when
     the config file doesn't exists. Notably, this test doesn't test the inner logic from
     the `Config` class, that is done in `test_config.py`, here the entire functionality
@@ -181,4 +178,4 @@ def test_setup_config_file_doesnt_exist(tmp_path):
     ):
 
         mock_config_from_file.side_effect = ConfigError("No config file")
-        assert setup_config(config_filpath) == return_config
+        assert setup_missing_config(config_filpath) == return_config

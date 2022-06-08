@@ -31,7 +31,7 @@ Bookmark = dict[str, str | None]
 
 
 # Functions:
-def setup_config(config_path: Path) -> Config:
+def setup_missing_config(config_path: Path) -> Config:
     """This function is used to set up the configuration object that is used by the
     program. It tries to find a valid configuration file and use to it to create
     the config object. If it fails to find a file, or if the file is not valid,
@@ -49,35 +49,29 @@ def setup_config(config_path: Path) -> Config:
         raises a typer.Abort to stop the program.
     """
 
-    try:
-        return Config.from_file(config_path)
+    error_console.print("[bold]No valid configuration file was found")
+    if Confirm("would you like to create one?"):
 
-    # If the config file can't be read, ask to create one interactively.
-    except ConfigError:
+        try:
+            config = Config.create_interactively().save_file(config_path)
+            console.print(
+                "[green]Configuration file created successfully:",
+                Panel(config, expand=False),
+                f"It has been saved in {config_path}",
+            )
+            return config
 
-        error_console.print("[bold]No valid configuration file was found")
-        if Confirm("would you like to create one?"):
-
-            try:
-                config = Config.create_interactively().save_file(config_path)
-                console.print(
-                    "[green]Configuration file created successfully:",
-                    Panel(config, expand=False),
-                    f"It has been saved in {config_path}",
-                )
-                return config
-
-            except FileNotFoundError:
-                error_console.print(
-                    "An error occurred and the configuration file could not be saved"
-                )
-                raise typer.Abort()
-
-        else:
+        except FileNotFoundError:
             error_console.print(
-                "Kobo highlights can not work without a valid configuration file"
+                "An error occurred and the configuration file could not be saved"
             )
             raise typer.Abort()
+
+    else:
+        error_console.print(
+            "Kobo highlights can not work without a valid configuration file"
+        )
+        raise typer.Abort()
 
 
 def query_bookmarks_from_ereader(
