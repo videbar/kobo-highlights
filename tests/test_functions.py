@@ -35,10 +35,9 @@ from kobo_highlights.functions import (
     query_bookmarks_from_ereader,
     query_bookmarks_from_markdown,
     add_bookmark_to_md,
-    console,
-    Config,
-    ConfigError,
 )
+from kobo_highlights.console import console
+from kobo_highlights.config import Config, ConfigError
 
 
 def test_query_bookmarks_from_ereader(tmp_path):
@@ -49,19 +48,19 @@ def test_query_bookmarks_from_ereader(tmp_path):
 
     test_root: Path = Path(__file__).parent
     # fake ereader directory:
-    sqlite_filepath: Path = test_root / "koboreader.sqlite"
+    sqlite_filepath: Path = test_root / "KoboReader.sqlite"
 
     # fake local dir for the copy of the database:
     local_dir: Path = tmp_path
 
-    assert not (local_dir / "koboreader.sqlite").is_file()
+    assert not (local_dir / "KoboReader.sqlite").is_file()
 
     queried_bookmarks: list[dict] = query_bookmarks_from_ereader(
         sqlite_filepath, local_dir
     )
 
-    assert queried_bookmarks == expected_bookmarks_sqlite
-    assert not (local_dir / "koboreader.sqlite").is_file()
+    assert queried_bookmarks == EXPECTED_BOOKMARKS_SQLITE
+    assert not (local_dir / "KoboReader.sqlite").is_file()
 
 
 def test_add_bookmark_to_md_new(tmp_path):

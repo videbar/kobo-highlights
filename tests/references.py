@@ -109,7 +109,7 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
     },
     {
         "id": "614009e0-8f62-4d25-9cef-6b3bc7224b6f",
-        "text": "Tienes que llegar a creer que es inútil para poder practicarla.\n",
+        "text": "Tienes que llegar a creer que es inútil para poder practicarla.",
         "annotation": None,
         "author": "Le Guin, Ursula K",
         "title": "La mano izquierda de la oscuridad",
@@ -141,7 +141,7 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
             " while running. Some languages have garbage collection that"
             " constantly looks for no longer used memory as the program runs;"
             " in other languages, the programmer must explicitly allocate and"
-            " free the memory. "
+            " free the memory."
         ),
         "annotation": None,
         "author": "Klabnik, Steve & Nichols, Carol",
@@ -166,7 +166,7 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
         "text": (
             "The leftmost bit in a binary number is called the Most Significant"
             " Bit (MSB). The rightmost bit in a binary number is called the Least"
-            " Significant Bit (LSB)\n"
+            " Significant Bit (LSB)"
         ),
         "annotation": None,
         "author": "Lameres, Brock J",
