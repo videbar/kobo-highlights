@@ -5,6 +5,7 @@ description = """\
     Kobo Highlights is a CLI application to manage the bookmarks of your Kobo ereader. \
     It can import them into a human-friendly markdown database.\
     """
+license = "GPL-3.0-only"
 authors = ["Pedro Videgain Barranco"]
 readme = "README.md"
 homepage = "https://github.com/videbar/kobo-highlights"
