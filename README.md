@@ -14,6 +14,15 @@ Kobo highlights was develop as a personal project and it's design is based on ho
 particular ereader handles bookmarks, so there are no guarantees that it will work on
 other models.
 
+# Requirements
+
+Kobo highlights was developed and tested in [Fedora](https://getfedora.org/) and the
+automatic tests are run in Ubuntu as macOS. I expect it to work properly on most
+Linux distributions and on macOS. It has not been testes on Windows, but you can try
+it.
+
+Kobo highlights requires Python 3.10.
+
 # Installation
 
 This project was developed using [Poetry](https://python-poetry.org/) and there are
@@ -75,3 +84,29 @@ don't want to create a configuration file, Kobo Highlights will stop.
 You can manage your configuration file with the `kh config` command. In particular
 you cant use `config show` to show your current configuration and `config new` to
 create and save a new configuration.
+
+# The markdown database
+
+The main goal of Kobo highlights is to read the bookmarks from the ereader and format
+them in a way in which they are easy to work with. I choose to do this by creating
+a markdown database of the bookmarks. This database is located in the directory
+specified in the configuration and will have a markdown file per book. The names
+of these files follow the convention `<book title> - <book author(s)>.md`.
+
+The markdown files will contain, for each bookmark in that book, a
+[markdown block quote](https://spec.commonmark.org/0.30/#block-quotes) that contains
+the text highlighted in the ereader potentially followed by a set of paragraphs
+containing the possible annotations that were made about the highlighted text.
+
+Note that Kobo highlights by default only imports new bookmarks to the markdown
+database. To determine if a bookmark is already in the database, Kobo highlights reads
+the plain text inside every block quote in every file that could follow the filename
+convention. This has the following consequences:
+
+* Because only the plain text in the block quotes is read, you can add emphasis
+indicators (`**`, `*`, `__`, and `_`) to the highlighted text and Kobo highlights
+won't notice.
+
+* Because Kobo highlights only looks at the highlighted text, but not at the
+annotations, you can modify the annotation text as you please and Kobo highlights
+will not notice.

@@ -7,6 +7,7 @@ description = """\
     """
 authors = ["Pedro Videgain Barranco"]
 readme = "README.md"
+homepage = "https://github.com/videbar/kobo-highlights"
 classifiers = [
     "Environment :: Console",
     "Operating System :: POSIX :: Linux",
