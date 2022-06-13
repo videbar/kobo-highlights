@@ -109,4 +109,4 @@ won't notice.
 
 * Because Kobo highlights only looks at the highlighted text, but not at the
 annotations, you can modify the annotation text as you please and Kobo highlights
-will not notice.
+won't notice.
