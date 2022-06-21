@@ -24,8 +24,6 @@ typer = {extras = ["all"], version = "^0.4.1"}
 toml = "^0.10.2"
 pydantic = "^1.9.0"
 rich = "^12.2.0"
-marko = "^1.2.1"
-beautifulsoup4 = "^4.11.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1"

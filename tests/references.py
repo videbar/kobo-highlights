@@ -14,14 +14,31 @@ arguments.
 * BOOKMARKS_TO_ADD (list[dict]): A list of bookmarks that, when imported to markdown,
 would result in the REFERENCE_MARKDOWN document.
 
+* JSON_CONTENTS (str): Contents of a valid JSON file that keeps track of the bookmarks
+that have already been imported.
+
+* WRONG_JSON_CONTENTS (str): Contents of a invalid JSON file.
+
+* JSON_CONTENTS_NO_DICT(str): Contents of a valid JSON file that doesn't contain a
+dictionary (as it should).
+
+* JSON_CONTENTS_WRONG_KEY(str): Contents of a valid JSON file that contains a dictionary
+but it has the wrong key.
+
+* JSON_CONTENTS_WRONG_VALUR(str): Contents of a valid JSON file that contains a
+dictionary with the right key, but without a list of IDs.
+
+* EMPTY_JSON_CONTENTS (str): Contents of a valid JSON file that doesn't hold any
+bookmarks.
+
+* BOOKMARK_IDS_FROM_JSON (list[str]): The IDs of the bookmarks that correspond to the
+contents of `JSON_CONTENTS`.
+
 * REFERENCE_MARKDOWN (list): A list of reference markdown text that results from
 importing the bookmarks in `BOOKMARKS_TO_ADD`. The list contains two markdown documents,
 one corresponds to the first bookmark in `BOOKMARKS_TO_ADD` being imported and the
 second one corresponds to the second bookmark in `BOOKMARKS_TO_ADD` being imported to a
 file that already exists.
-
-* BOOKMARKS_QUERIED_FROM_MD (list[dict]):  A list of how the two bookmarks in
-`REFERENCE_MARKDOWN` should look when queried.
 
 * EXPECTED_BOOKMARKS_SQLITE (list[dict]): A list of the bookmarks contained in the
 sqlite file that ships with the tests (`KoboReader.sqlite`).
@@ -83,17 +100,44 @@ REFERENCE_MARKDOWN = [
 ]
 
 
-BOOKMARKS_QUERIED_FROM_MD: list[dict] = [
-    {
-        "text": "I am a bookmark with multiple lines.\nI continue here",
-        "author": "Author name with a -in the middle (no spaces)",
-        "title": "Book title with a - in the middle",
-    },
-    {
-        "text": "I am a bookmark",
-        "author": "Author name with a -in the middle (no spaces)",
-        "title": "Book title with a - in the middle",
-    },
+JSON_CONTENTS: str = (
+    "{"
+    '"imported_bookmark_ids": ['
+    '"11111111-1111-1111-1111-111111111111",'
+    '"11111111-1111-1111-1111-111111111112",'
+    '"11111111-1111-1111-1111-111111111113"'
+    "]"
+    "}"
+)
+WRONG_JSON_CONTENTS: str = (
+    "{"
+    '"imported_bookmark_ids": ['
+    '"11111111-1111-1111-1111-111111111111",'
+    '"11111111-1111-1111-1111-111111111112",'
+    '"11111111-1111-1111-1111-111111111113"'
+)
+EMPTY_JSON_CONTENTS: str = '{"imported_bookmark_ids": []}'
+JSON_CONTENTS_NO_DICT: str = (
+    "["
+    '"11111111-1111-1111-1111-111111111111",'
+    '"11111111-1111-1111-1111-111111111112",'
+    '"11111111-1111-1111-1111-111111111113"'
+    "]"
+)
+JSON_CONTENTS_WRONG_KEY: str = (
+    "{"
+    '"wrong_key": ['
+    '"11111111-1111-1111-1111-111111111111",'
+    '"11111111-1111-1111-1111-111111111112",'
+    '"11111111-1111-1111-1111-111111111113"'
+    "]"
+    "}"
+)
+JSON_CONTENTS_WRONG_VALUE: str = '{"imported_bookmark_ids": "Not a list"}'
+BOOKMARK_IDS_FROM_JSON: list[str] = [
+    "11111111-1111-1111-1111-111111111111",
+    "11111111-1111-1111-1111-111111111112",
+    "11111111-1111-1111-1111-111111111113",
 ]
 
 

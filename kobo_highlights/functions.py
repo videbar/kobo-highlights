@@ -7,20 +7,21 @@ file is not found
 * query_bookmarks_from_ereader(): Query the ereader database to get a list of all the
 bookmarks.
 
-* query_bookmarks_from_markdown(): Simple function that looks for bookmarks on the
-markdown whose filename matches the convention use by the program.
+* query_bookmark_ids_from_json(): Read the IDs of the bookmarks that have been already
+imported from the JSON file.
+
+* write_bookmark_id_to_json(): Add a new ID to the JSON file if it's not already there.
 """
 
 # Imports:
 from pathlib import Path
 from shutil import copy
 import sqlite3
+import json
 
 import typer
 from rich.prompt import Confirm
 from rich.panel import Panel
-from marko.ext.gfm import gfm
-from bs4 import BeautifulSoup
 
 from kobo_highlights.config import Config
 from kobo_highlights.console import console, error_console
@@ -28,6 +29,7 @@ from kobo_highlights.console import console, error_console
 
 # Type alias:
 Bookmark = dict[str, str | None]
+Bookmark_id = str | None
 
 
 # Functions:
@@ -35,7 +37,7 @@ def setup_missing_config(config_path: Path) -> Config:
     """This function called at the beginning of the program when a valid configuration
     file cannot be found. It asks the user to create a new `Config` object interactively
     and, if an object is created, it is used to create a new config file.
-    
+
     Args:
         config_path (Path): Path where the config file will be created.
 
@@ -164,56 +166,83 @@ def query_bookmarks_from_ereader(
     return all_bookmarks
 
 
-def query_bookmarks_from_markdown(dir_md_files: Path) -> list[Bookmark]:
-    """This function reads all the markdown files in a given directory and extract
-    bookmarks that were already exported. It first parses the markdown into html and
-    then it uses the beautiful soup library to scrap the bookmarks.
-
-    This is non-exhaustive basic parser, it only looks for markdown files with names
-    that match the ones created by the program and extract all blockquotes from this.
-    The bookmarks are consider to be the plaintext (no html tags) inside the
-    blockquotes.
-
-    This simple behaviour is enough for two reasons. First, this parser will only be
-    used to check if the bookmarks queried from the ereader database are already stored
-    as markdown, so false positives are not a problem. Second, when bookmarks are
-    extracted from blockquotes only the plaintext is consider to make it possible for
-    users to, for example, emphasis the text in the bookmark without the parser
-    noticing.
+def query_bookmark_ids_from_json(json_filepath: Path) -> list[Bookmark_id]:
+    """Read the IDs of the bookmarks that have been already imported from the JSON file.
+    It tries to load the JSON file, and it checks the structure. If no JSON file is
+    found, it will silently create one and it will return an empty list. If a JSON file
+    is found but the structure is incorrect (invalid JSON structure or it doesn't
+    contain a list of ids), it will ask the user if they want to create a new empty
+    JSON file.
 
     Args:
-        dir_md_files (Path): Directory containing the markdown files.
+        json_filepath (Path): Path to the JSON file.
+
+    Raises:
+        typer.Abort: If the structure of the JSON file is invalid an the user doesn't
+        want to create a new one, this exception is raised to stop the program.
 
     Returns:
-        list[dict[str, str]]: List of the bookmarks found.
+        list[Bookmark_id]: List of bookamrk IDs.
+    """
+    try:
+
+        json_content: dict[str, list[Bookmark_id]] = json.loads(
+            json_filepath.read_text()
+        )
+
+        # The JSON file should correspond to a dictionary with the key
+        # imported_bookmark_ids that contains a list. If the dictionary doesn't contain
+        # the right key, a KeyError will be raised. If the key doesn't correspond to a
+        # list, a TypeError will be raised. Both of this exceptions are catched bellow.
+        if not isinstance(json_content["imported_bookmark_ids"], list):
+            raise TypeError()
+
+    # If no JSON file exists create one.
+    except FileNotFoundError:
+
+        json_content: dict[str, list[Bookmark_id]] = {"imported_bookmark_ids": []}
+        with json_filepath.open("w") as json_file:
+            json.dump(json_content, json_file)
+
+    # If there is a JSON file but the structure is wrong, the user will be asked if
+    # they want to create a new one.
+    except (json.decoder.JSONDecodeError, KeyError, TypeError):
+        error_console.print(
+            "The JSON file that tracks of the imported bookmarks doesn't have a valid"
+            f" JSON structure:\n{json_filepath}"
+        )
+
+        if Confirm.ask(
+            "Do you want to overwrite it (Kobo Highlights will forget which bookmarks"
+            " you have already imported, but the content of the makdown files will not"
+            " be deleted)",
+            console=error_console,
+        ):
+            json_content: dict[str, list[Bookmark_id]] = {"imported_bookmark_ids": []}
+            with json_filepath.open("w") as json_file:
+                json.dump(json_content, json_file)
+
+        else:
+            raise typer.Abort()
+
+    return json_content["imported_bookmark_ids"]
+
+
+def write_bookmark_id_to_json(json_filepath: Path, id: Bookmark_id):
+    """Add a new ID to the JSON file if it's not already there.
+
+    Args:
+        json_filepath (Path): Path to the JSON file.
+
+        id (Bookmark_id): Bookmark ID to be added.
     """
 
-    all_bookmarks: list[Bookmark] = []
+    stored_ids: list[Bookmark_id] = query_bookmark_ids_from_json(json_filepath)
+    if id not in stored_ids:
+        stored_ids.append(id)
 
-    # The expression used in glob() matches filenames corresponding to bookmark markdown
-    # files.
-    for md_filepath in dir_md_files.glob("* - *.md"):
-
-        current_filename: str = md_filepath.stem
-
-        # Used .rsplit(" - ", 1) instead of simply .split() in case a book title
-        # contains the string " - ".
-        current_title, current_author = current_filename.rsplit(" - ", 1)
-
-        html_text: str = gfm(md_filepath.read_text())
-        soup = BeautifulSoup(html_text, "html.parser")
-
-        for blockquote in soup("blockquote"):
-            current_bookmark = {
-                "author": current_author,
-                "title": current_title,
-                # BeautifulSoup adds leading and trailing "\n" which need to be striped.
-                "text": blockquote.text[1:-1],
-            }
-
-            all_bookmarks.append(current_bookmark)
-
-    return all_bookmarks
+    with json_filepath.open("w") as json_file:
+        json.dump({"imported_bookmark_ids": stored_ids}, json_file)
 
 
 def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):

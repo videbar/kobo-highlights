@@ -8,10 +8,29 @@ sqlite database.
 * test_add_bookmark_to_md_existing: Tests adding a bookmark to an existing markdown
 file.
 
-* test_query_bookmarks_from_markdown: Tests querying the bookmarks from markdown files.
+* test_query_bookmark_ids_from_json_correct: Test that the bookmark ids are properly
+queried from the JSON file.
 
-* test_query_bookmarks_from_markdown_ignore: Tests that markdown files without a proper
-name are ignored when querying the bookmarks.
+* test_query_bookmark_ids_from_json_no_file: Test that an empty list is returned when
+no JSON file exists and that a JSON file is created.
+
+* test_query_bookmark_ids_from_json_wrong_json: Test that, when the JSON file
+doesn't have a valid structure and the user agrees, an empty list is returned and a new
+empty file is created.
+
+* test_query_bookmark_ids_from_json_no_dict: Test that, when the JSON file
+does have a valid structure but it doesn't represent a dictionary and the user agrees,
+an empty list is returned and a new empty file is created.
+
+* test_query_bookmark_ids_from_json_wrong_key: Test that, when the JSON file
+does have a valid structure, it does represent a dictionary, but the dictionary doesn't
+use the key `imported_bookmark_ids` and the user agrees, an empty list is returned and
+a new empty file is created.
+
+* test_query_bookmark_ids_from_json_wrong_value: Test that, when the JSON file
+does have a valid structure, it does represent a dictionary, the dictionary does
+use the key `imported_bookmark_ids`, but the value is not a list, and the user agrees,
+an empty list is returned and a new empty file is created.
 
 * test_setup_missing_config: Tests the that a proper `Config` object is created when a
 config file doesn't exists.
@@ -19,6 +38,7 @@ config file doesn't exists.
 
 # Imports:
 from pathlib import Path
+import json
 from unittest import mock
 from unittest.mock import patch, mock_open
 
@@ -27,17 +47,25 @@ from rich.prompt import Confirm
 from .references import (
     BOOKMARKS_TO_ADD,
     REFERENCE_MARKDOWN,
-    BOOKMARKS_QUERIED_FROM_MD,
+    JSON_CONTENTS,
+    WRONG_JSON_CONTENTS,
+    EMPTY_JSON_CONTENTS,
+    JSON_CONTENTS_NO_DICT,
+    JSON_CONTENTS_WRONG_KEY,
+    JSON_CONTENTS_WRONG_VALUE,
+    BOOKMARK_IDS_FROM_JSON,
     EXPECTED_BOOKMARKS_SQLITE,
 )
 from kobo_highlights.functions import (
     setup_missing_config,
     query_bookmarks_from_ereader,
-    query_bookmarks_from_markdown,
+    query_bookmark_ids_from_json,
+    write_bookmark_id_to_json,
     add_bookmark_to_md,
 )
-from kobo_highlights.console import console
-from kobo_highlights.config import Config, ConfigError
+from kobo_highlights.console import console, error_console
+from kobo_highlights.config import Config
+
 
 
 def test_query_bookmarks_from_ereader(tmp_path):
@@ -111,47 +139,126 @@ def test_add_bookmark_to_md_existing(tmp_path):
         mocked_path_open().write.assert_called_once_with(REFERENCE_MARKDOWN[1])
 
 
-def test_query_bookmarks_from_markdown(tmp_path):
-    """Tests querying the bookmarks from markdown files. This test uses the contents
-    from `REFERENCE_MARKDOWN`, which should result in the bookmarks in
-    `BOOKMARKS_QUERIED_FROM_MD`.
+def test_query_bookmark_ids_from_json_correct(tmp_path):
+    """Test that the bookmark ids are properly queried from the JSON file. The contents
+    of the JSON file are stored in `JSON_CONTENTS` and the corresponding list of ids
+    is `BOOKMARK_IDS_FROM_JSON`.
     """
 
-    complete_markdown: str = REFERENCE_MARKDOWN[0] + REFERENCE_MARKDOWN[1]
+    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath.write_text(JSON_CONTENTS)
 
-    title: str = BOOKMARKS_QUERIED_FROM_MD[0]["title"]
-    author: str = BOOKMARKS_QUERIED_FROM_MD[0]["author"]
+    queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
-    # According to convention.
-    md_filename: str = f"{title} - {author}.md"
-    md_filepath: Path = tmp_path / md_filename
-    md_filepath.write_text(complete_markdown)
-
-    queried_bookmarks = query_bookmarks_from_markdown(tmp_path)
-    assert queried_bookmarks == BOOKMARKS_QUERIED_FROM_MD
+    assert queried_ids == BOOKMARK_IDS_FROM_JSON
 
 
-def test_query_bookmarks_from_markdown_ignore(tmp_path):
-    """Tests that markdown files without a proper name are ignored when querying the
-    bookmarks. To do so three markdown files are created with slightly wrong names
-    (according to the convention). The files contain proper bookmarks
-    (from REFERENCE_MARKDOWN), but because of the filename they should be ignored by
-    `query_bookmarks_from_markdown()`.
+def test_query_bookmark_ids_from_json_no_file(tmp_path):
+    """Test that an empty list is returned when no JSON file exists and that a JSON
+    file is created. The json file path `tmp_path/.imported_bookmarks.json` should
+    not be a file before the function is run. After executing the function, it should
+    be a JSON file with the contents from `EMPTY_JSON_CONTENTS`.
+    """
+    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+
+    assert not json_filepath.is_file()
+    queried_ids: list = query_bookmark_ids_from_json(json_filepath)
+
+    assert queried_ids == []
+    assert json_filepath.is_file()
+    assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+
+
+def test_query_bookmark_ids_from_json_wrong_json(tmp_path):
+    """Test that, when the JSON file doesn't have a valid structure and the user agrees,
+    an empty list is returned and a new empty file is created. This test patches the
+    `Confirm.ask` method to mimick the user approval. When the approval is given, the
+    effect should be similar to calling the funciton without a JSON file.
     """
 
-    complete_markdown: str = REFERENCE_MARKDOWN[0] + REFERENCE_MARKDOWN[1]
-    md_filenames: list[str] = [
-        "title- author.md",
-        "title -author.md",
-        "title-author.md",
-    ]
+    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath.write_text(WRONG_JSON_CONTENTS)
 
-    for filename in md_filenames:
-        md_filepath: Path = tmp_path / filename
-        md_filepath.write_text(complete_markdown)
+    with (
+        patch.object(Confirm, "ask", return_value=True) as mock_ask,
+        patch.object(error_console, "print") as mock_print
+    ):
+        queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
-    queried_bookmarks = query_bookmarks_from_markdown(tmp_path)
-    assert queried_bookmarks == []
+        mock_print.assert_called_once()
+        mock_ask.assert_called_once()
+        assert queried_ids == []
+        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+
+
+def test_query_bookmark_ids_from_json_no_dict(tmp_path):
+    """Test that, when the JSON file does have a valid structure but it doesn't
+    represent a dictionary and the user agrees, an empty list is returned and a new
+    empty file is created. This test patches the `Confirm.ask` method to mimick the user
+    approval. When the approval is given, the effect should be similar to calling the
+    funciton without a JSON file.
+    """
+
+    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath.write_text(JSON_CONTENTS_NO_DICT)
+
+    with (
+        patch.object(Confirm, "ask", return_value=True) as mock_ask,
+        patch.object(error_console, "print") as mock_print
+    ):
+        queried_ids: list = query_bookmark_ids_from_json(json_filepath)
+
+        mock_print.assert_called_once()
+        mock_ask.assert_called_once()
+        assert queried_ids == []
+        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+
+
+def test_query_bookmark_ids_from_json_wrong_key(tmp_path):
+    """Test that, when the JSON file does have a valid structure, it does represent a
+    dictionary, but the dictionary doesn't use the key `imported_bookmark_ids` and the
+    user agrees, an empty list is returned and a new empty file is created. This test
+    patches the `Confirm.ask` method to mimick the user approval. When the approval is
+    given, the effect should be similar to calling the funciton without a JSON file.
+    """
+
+    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath.write_text(JSON_CONTENTS_WRONG_KEY)
+
+    with (
+        patch.object(Confirm, "ask", return_value=True) as mock_ask,
+        patch.object(error_console, "print") as mock_print
+    ):
+        queried_ids: list = query_bookmark_ids_from_json(json_filepath)
+
+        mock_print.assert_called_once()
+        mock_ask.assert_called_once()
+        assert queried_ids == []
+        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+
+
+def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
+    """Test that, when the JSON file
+    does have a valid structure, it does represent a dictionary, the dictionary does
+    use the key `imported_bookmark_ids`, but the value is not a list, and the user
+    agrees, an empty list is returned and a new empty file is created. This test patches
+    the `Confirm.ask` method to mimick the user approval. When the approval is given,
+    the effect should be similar to calling the funciton without a JSON file.
+    """
+
+    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath.write_text(JSON_CONTENTS_WRONG_KEY)
+
+    with (
+        patch.object(Confirm, "ask", return_value=True) as mock_ask,
+        patch.object(error_console, "print") as mock_print
+    ):
+        queried_ids: list = query_bookmark_ids_from_json(json_filepath)
+
+        mock_print.assert_called_once()
+        mock_ask.assert_called_once()
+        assert queried_ids == []
+        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
 
 
 def test_setup_missing_config(tmp_path):

@@ -14,12 +14,14 @@ from kobo_highlights.console import console, error_console
 from kobo_highlights.functions import (
     setup_missing_config,
     query_bookmarks_from_ereader,
-    query_bookmarks_from_markdown,
+    query_bookmark_ids_from_json,
+    write_bookmark_id_to_json,
     add_bookmark_to_md,
 )
 
 # Type alias:
 Bookmark = dict[str, str | None]
+Bookmark_id = str | None
 
 # Main typer app:
 app = typer.Typer(
@@ -40,6 +42,7 @@ def setup():
     global CONFIG_PATH
     global config
     global SQLITE_PATH
+    global JSON_PATH 
 
     APP_NAME: str = "kobo_highlights"
     APP_PATH = Path(typer.get_app_dir(APP_NAME))
@@ -54,6 +57,7 @@ def setup():
         raise typer.Exit()
 
     SQLITE_PATH = config.ereader_dir / ".kobo/KoboReader.sqlite"
+    JSON_PATH = config.target_dir / ".imported_bookmarks.json"
 
 
 @app.command("ls")
@@ -69,14 +73,12 @@ def list_highlights(all: bool = typer.Option(False, help="Show all bookmarks")):
     )
 
     if not all:
-        md_bookmarks: list[Bookmark] = query_bookmarks_from_markdown(config.target_dir)
+        # IDs of the bookmarks that have already been imported.
+        md_bookmarks_ids: list[Bookmark_id] = query_bookmark_ids_from_json(JSON_PATH)
+
         # Filter the bookmark to print to include only those that are in the ereader
-        # (er_bm) but not on the markdown files (md_bm).
-        bookmarks_to_print = [
-            bm_er
-            for bm_er in bookmarks_to_print
-            if not any(md_bm.items() <= bm_er.items() for md_bm in md_bookmarks)
-        ]
+        # but not on the markdown files.
+        bookmarks_to_print = [bm for bm in bookmarks_to_print if bm["id"] not in md_bookmarks_ids]
 
         # Used for the table printed to the terminal.
         title_str: str = "New bookmarks in your ereader"
@@ -134,20 +136,15 @@ def import_highlights(
 
         case "new":
 
-            md_bookmarks: list[Bookmark] = query_bookmarks_from_markdown(
-                config.target_dir
-            )
+            md_bookmarks_ids: list[Bookmark_id] = query_bookmark_ids_from_json(JSON_PATH)
 
             # Filter the bookmark to print to include only those that are in the ereader
-            # (er_bm) but not on the markdown files (md_bm).
-            bookmarks_to_save = [
-                bm_er
-                for bm_er in ereader_bookmarks
-                if not any(md_bm.items() <= bm_er.items() for md_bm in md_bookmarks)
-            ]
+            # but not on the markdown files.
+            bookmarks_to_save = [bm for bm in ereader_bookmarks if bm["id"] not in md_bookmarks_ids]
 
             for bookmark in bookmarks_to_save:
                 add_bookmark_to_md(bookmark, config.target_dir)
+                write_bookmark_id_to_json(JSON_PATH, bookmark["id"])
 
             console.print("[green]All new Bookmarks have been imported")
 
