@@ -137,7 +137,7 @@ JSON_CONTENTS_WRONG_VALUE: str = '{"imported_bookmark_ids": "Not a list"}'
 BOOKMARK_IDS_FROM_JSON: list[str] = [
     "11111111-1111-1111-1111-111111111111",
     "11111111-1111-1111-1111-111111111112",
-    "11111111-1111-1111-1111-111111111113",
+    "11111111-1111-1111-1111-111111111113"
 ]
 
 
@@ -145,17 +145,24 @@ BOOKMARK_IDS_FROM_JSON: list[str] = [
 # shipped with the tests and is used to test the sqlite query function.
 EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
     {
+        "id": "10625218-96ff-4bc6-883f-3c2fd94cda72",
+        "text": "Sarf?",
+        "annotation": None,
+        "author": "Ursula K. Le Guin",
+        "title": "La mano izquierda de la oscuridad",
+    },
+    {
         "id": "709644b4-03cb-448c-8b55-06c63cc26308",
         "text": "normales",
         "annotation": None,
-        "author": "Le Guin, Ursula K",
+        "author": "Ursula K. Le Guin",
         "title": "La mano izquierda de la oscuridad",
     },
     {
         "id": "614009e0-8f62-4d25-9cef-6b3bc7224b6f",
         "text": "Tienes que llegar a creer que es inútil para poder practicarla.",
         "annotation": None,
-        "author": "Le Guin, Ursula K",
+        "author": "Ursula K. Le Guin",
         "title": "La mano izquierda de la oscuridad",
     },
     {
@@ -165,7 +172,7 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
             " return a value. Expressions evaluate to a resulting value"
         ),
         "annotation": None,
-        "author": "Klabnik, Steve & Nichols, Carol",
+        "author": "Steve Klabnik",
         "title": "The Rust Programming Language",
     },
     {
@@ -175,7 +182,7 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
             " languages, such as F#, OCaml, and Haskell."
         ),
         "annotation": None,
-        "author": "Klabnik, Steve & Nichols, Carol",
+        "author": "Steve Klabnik",
         "title": "The Rust Programming Language",
     },
     {
@@ -188,21 +195,21 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
             " free the memory."
         ),
         "annotation": None,
-        "author": "Klabnik, Steve & Nichols, Carol",
+        "author": "Steve Klabnik",
         "title": "The Rust Programming Language",
     },
     {
         "id": "8b0e0173-6b3b-4bea-8361-175e259311df",
         "text": "numeral.",
         "annotation": "numeral",
-        "author": "Lameres, Brock J",
+        "author": "Brock J. Lameres",
         "title": "Introduction to Logic Circuits & Logic Design With Verilog",
     },
     {
         "id": "9abdd7f9-2bf3-46d5-b075-2a1867d0b3e9",
         "text": "nibble.",
         "annotation": "nibble",
-        "author": "Lameres, Brock J",
+        "author": "Brock J. Lameres",
         "title": "Introduction to Logic Circuits & Logic Design With Verilog",
     },
     {
@@ -213,7 +220,7 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
             " Significant Bit (LSB)"
         ),
         "annotation": None,
-        "author": "Lameres, Brock J",
+        "author": "Brock J. Lameres",
         "title": "Introduction to Logic Circuits & Logic Design With Verilog",
     },
 ]

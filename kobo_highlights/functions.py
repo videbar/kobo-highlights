@@ -130,33 +130,32 @@ def query_bookmarks_from_ereader(
         }
 
         # The author and title information are obtained from the "VolumeID", which is
-        # simply the path to the .epub files. The author name can be obtained directly,
-        # since it is the name of the parent folder of the .epub files.
+        # simply the path to the .epub files.
         #
-        # To obtain the book title in a proper format, the "content" table of the
-        # database is queried. This table has a "BookID" column that matches the
-        # "VolumeID" from the "Bookmark" table. It also has a column named "BookTitle"
-        # that contains the title of the book.
-
-        # The structure of the volume id is:
-        # file:///internal/path/<author name>/book.epub
-        # In order to obtain the author, first the string between the two right-most
-        # slashes (/) is retrieved, then the underscores are removed, since Kobo uses
-        # them instead of dots for author's initials, and finally, the " - " is removed,
-        # since it would conflict with the convention used by the program for filenames.
+        # To obtain the book title and author, the "content" table of the database is
+        # queried. This table has a "BookID" column that matches the "VolumeID" from the
+        # "Bookmark" table. It also has a ContentType column that divides the entries
+        # in the table in two, contentType = 6 and contentType = 9. For each book in
+        # the ereader there's an entry in the content table with contentType = 6 which
+        # contains the book title as "Title" and the author(s) as "Attribution".
+        #
+        # Before the author information is added, the " - " sub-strings are removed,
+        # since they would conflict with the convention used by the program for
+        # filenames. They are substituted by the string "-" (the spaces are removed).
         volume_id: str = bookmark_data[3]
-        current_bookmark["author"] = (
-            volume_id.rsplit("/", 2)[1].replace("_", "").replace(" - ", "-")
-        )
 
         # Query string used on the "content" table.
         CONTENT_QUERY: str = (
-            f"SELECT BookTitle FROM content WHERE BookID = '{volume_id}' LIMIT 1;"
+            f"SELECT Title, Attribution FROM content WHERE ContentID = '{volume_id}'"
+            " AND ContentType = '6' LIMIT 1;"
         )
 
         # The same book can appear multiple times on the "content" table, but in order
-        # to retrieve the title there's no need to query more than one result.
-        current_bookmark["title"] = cursor_content.execute(CONTENT_QUERY).fetchone()[0]
+        # to retrieve the data there's no need to query more than one result.
+        content_query_result: tuple = cursor_content.execute(CONTENT_QUERY).fetchone()
+
+        current_bookmark["title"] = content_query_result[0]
+        current_bookmark["author"] = content_query_result[1].replace(" - ", "-")
 
         all_bookmarks.append(current_bookmark)
 
