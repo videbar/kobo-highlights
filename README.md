@@ -28,13 +28,14 @@ Kobo highlights requires Python 3.10.
 This project was developed using [Poetry](https://python-poetry.org/) and there are
 multiple ways of installing it:
 
-* Simply download it from pypi: `pip install kobo-highlights`.
+* The recommended installation method is [downloading it from pypi](
+    https://pypi.org/project/kobo-highlights/): `pip install kobo-highlights`.
 
-* Install it with Poetry by cloning this repo and running `poetry install` inside it.
-Note that you must have poetry installed.
-
-* Install it from the repo using pip by cloning the repo and, inside it, running
-`pip install .`
+* If you want to install Kobo Highlights directly from this repo note that development
+takes place in the main branch, so make sure to install it from the commit corresponding
+to the last release.
+In this case you cant install it with Poetry (run `poetry install` inside the repo) or
+with pip (run `pip install .` inside the repo).
 
 # Quick guide
 
@@ -99,14 +100,9 @@ the text highlighted in the ereader potentially followed by a set of paragraphs
 containing the possible annotations that were made about the highlighted text.
 
 Note that Kobo highlights by default only imports new bookmarks to the markdown
-database. To determine if a bookmark is already in the database, Kobo highlights reads
-the plain text inside every block quote in every file that could follow the filename
-convention. This has the following consequences:
-
-* Because only the plain text in the block quotes is read, you can add emphasis
-indicators (`**`, `*`, `__`, and `_`) to the highlighted text and Kobo highlights
-won't notice.
-
-* Because Kobo highlights only looks at the highlighted text, but not at the
-annotations, you can modify the annotation text as you please and Kobo highlights
-won't notice.
+database. To determine if a bookmark is already in the database, Kobo highlights creates
+a hidden JSON file inside the markdown directory. Inside this hidden file Kobo
+Highlights stores the IDs of the bookmarks that have already been imported. This means
+that even if you modify the markdown files (or even delete the completely), Kobo
+Highlights will  remember that bookmarks that you had imported and they will not be
+considered new.
