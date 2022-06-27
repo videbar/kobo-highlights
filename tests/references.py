@@ -137,7 +137,7 @@ JSON_CONTENTS_WRONG_VALUE: str = '{"imported_bookmark_ids": "Not a list"}'
 BOOKMARK_IDS_FROM_JSON: list[str] = [
     "11111111-1111-1111-1111-111111111111",
     "11111111-1111-1111-1111-111111111112",
-    "11111111-1111-1111-1111-111111111113"
+    "11111111-1111-1111-1111-111111111113",
 ]
 
 
@@ -222,5 +222,12 @@ EXPECTED_BOOKMARKS_SQLITE: list[dict] = [
         "annotation": None,
         "author": "Brock J. Lameres",
         "title": "Introduction to Logic Circuits & Logic Design With Verilog",
+    },
+    {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "text": "Highlighted text",
+        "annotation": "Annotated text",
+        "author": "Unknown author",
+        "title": "Fake Book",
     },
 ]

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kobo-highlights"
-version = "1.0.0"
+version = "1.0.1"
 description = """\
     Kobo Highlights is a CLI application to manage the bookmarks of your Kobo ereader. \
     It can import them into a human-friendly markdown database.\

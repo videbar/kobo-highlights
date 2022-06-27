@@ -155,7 +155,11 @@ def query_bookmarks_from_ereader(
         content_query_result: tuple = cursor_content.execute(CONTENT_QUERY).fetchone()
 
         current_bookmark["title"] = content_query_result[0]
-        current_bookmark["author"] = content_query_result[1].replace(" - ", "-")
+
+        if queried_author := content_query_result[1]:
+            current_bookmark["author"] = queried_author.replace(" - ", "-")
+        else:
+            current_bookmark["author"] = "Unknown author"
 
         all_bookmarks.append(current_bookmark)
 
