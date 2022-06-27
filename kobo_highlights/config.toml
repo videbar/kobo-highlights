@@ -1,7 +1,0 @@
-# This is a TOML document.
-
-kobo_ereader_path = ""
-
-# This is the directory where the markdown files will be created, it can be your vault
-# or subfolder of your vault.
-target_folder = ""

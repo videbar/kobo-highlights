@@ -1,0 +1,5 @@
+# Directory where your highlights will be exported:
+target_dir = "/path/to/the/markdown/database/directory"
+
+# Directory where your ereader is mounted:
+ereader_dir = "/path/where/the/ereader/is/mounted"
