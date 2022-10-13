@@ -149,7 +149,6 @@ def test_query_bookmark_ids_from_json_correct(tmp_path):
     json_filepath.write_text(JSON_CONTENTS)
 
     assert json_filepath.is_file()
-    import json
 
     json.loads(json_filepath.read_text())
 
@@ -252,7 +251,7 @@ def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS_WRONG_KEY)
+    json_filepath.write_text(JSON_CONTENTS_WRONG_VALUE)
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
