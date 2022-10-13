@@ -1,11 +1,11 @@
 """Tests for the functionality in `functions.py`:
 
-* test_query_bookmarks_from_ereader: Tests the querying of bookmarks from the erader
+* test_query_bookmarks_from_ereader: Test the querying of bookmarks from the erader
 sqlite database.
 
-* test_add_bookmark_to_md_new: Tests adding a bookmark to a new markdown file.
+* test_add_bookmark_to_md_new: Test adding a bookmark to a new markdown file.
 
-* test_add_bookmark_to_md_existing: Tests adding a bookmark to an existing markdown
+* test_add_bookmark_to_md_existing: Test adding a bookmark to an existing markdown
 file.
 
 * test_query_bookmark_ids_from_json_correct: Test that the bookmark ids are properly
@@ -32,7 +32,7 @@ does have a valid structure, it does represent a dictionary, the dictionary does
 use the key `imported_bookmark_ids`, but the value is not a list, and the user agrees,
 an empty list is returned and a new empty file is created.
 
-* test_setup_missing_config: Tests the that a proper `Config` object is created when a
+* test_setup_missing_config: Test the that a proper `Config` object is created when a
 config file doesn't exists.
 """
 
@@ -68,16 +68,16 @@ from kobo_highlights.config import Config
 
 
 def test_query_bookmarks_from_ereader(tmp_path):
-    """Tests the querying of bookmarks from the erader sqlite database. To do so, a
+    """Test the querying of bookmarks from the erader sqlite database. To do so, a
     pre-defined sqlite file is shipped with the tests (`KoboReader.sqlite`) as well as
     what the result of the querying should look like (`EXPECTED_BOOKMARKS_SQLITE`).
     """
 
     test_root: Path = Path(__file__).parent
-    # fake ereader directory:
+    # Fake ereader directory:
     sqlite_filepath: Path = test_root / "KoboReader.sqlite"
 
-    # fake local dir for the copy of the database:
+    # Fake local dir for the copy of the database:
     local_dir: Path = tmp_path
 
     assert not (local_dir / "KoboReader.sqlite").is_file()
@@ -92,7 +92,7 @@ def test_query_bookmarks_from_ereader(tmp_path):
 
 
 def test_add_bookmark_to_md_new(tmp_path):
-    """Tests adding a bookmark to a new markdown file. This test uses the first bookmark
+    """Test adding a bookmark to a new markdown file. This test uses the first bookmark
     contained in`bookmarks_to_add`. The resulting markdown text should be the first
     string from `REFERENCE_MARKDOWN`.
     """
@@ -116,7 +116,7 @@ def test_add_bookmark_to_md_new(tmp_path):
 
 
 def test_add_bookmark_to_md_existing(tmp_path):
-    """Tests adding a bookmark to an existing markdown This test uses the second
+    """Test adding a bookmark to an existing markdown This test uses the second
     bookmark contained in`BOOKMARKS_TO_ADD`. The resulting markdown text should be the
     second string from `REFERENCE_MARKDOWN`.
     """
@@ -267,7 +267,7 @@ def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
 
 
 def test_setup_missing_config(tmp_path):
-    """Tests the that a proper `Config` object is created when a config file doesn't
+    """Test the that a proper `Config` object is created when a config file doesn't
     exists. Notably, this test doesn't test the inner logic from the `Config` class,
     that is done in `test_config.py`, here the entire functionality of `Config` is
     mocked.
