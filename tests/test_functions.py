@@ -67,7 +67,6 @@ from kobo_highlights.console import console, error_console
 from kobo_highlights.config import Config
 
 
-
 def test_query_bookmarks_from_ereader(tmp_path):
     """Tests the querying of bookmarks from the erader sqlite database. To do so, a
     pre-defined sqlite file is shipped with the tests (`KoboReader.sqlite`) as well as
@@ -146,17 +145,17 @@ def test_query_bookmark_ids_from_json_correct(tmp_path):
     is `BOOKMARK_IDS_FROM_JSON`.
     """
 
-    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
     json_filepath.write_text(JSON_CONTENTS)
-    
+
     assert json_filepath.is_file()
     import json
+
     json.loads(json_filepath.read_text())
 
+    queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
-    #  queried_ids: list = query_bookmark_ids_from_json(json_filepath)
-
-    #  assert queried_ids == BOOKMARK_IDS_FROM_JSON
+    assert queried_ids == BOOKMARK_IDS_FROM_JSON
 
 
 def test_query_bookmark_ids_from_json_no_file(tmp_path):
@@ -165,7 +164,7 @@ def test_query_bookmark_ids_from_json_no_file(tmp_path):
     not be a file before the function is run. After executing the function, it should
     be a JSON file with the contents from `EMPTY_JSON_CONTENTS`.
     """
-    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
 
     assert not json_filepath.is_file()
     queried_ids: list = query_bookmark_ids_from_json(json_filepath)
@@ -182,12 +181,12 @@ def test_query_bookmark_ids_from_json_wrong_json(tmp_path):
     effect should be similar to calling the funciton without a JSON file.
     """
 
-    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
     json_filepath.write_text(WRONG_JSON_CONTENTS)
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
-        patch.object(error_console, "print") as mock_print
+        patch.object(error_console, "print") as mock_print,
     ):
         queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
@@ -205,12 +204,12 @@ def test_query_bookmark_ids_from_json_no_dict(tmp_path):
     funciton without a JSON file.
     """
 
-    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
     json_filepath.write_text(JSON_CONTENTS_NO_DICT)
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
-        patch.object(error_console, "print") as mock_print
+        patch.object(error_console, "print") as mock_print,
     ):
         queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
@@ -228,12 +227,12 @@ def test_query_bookmark_ids_from_json_wrong_key(tmp_path):
     given, the effect should be similar to calling the funciton without a JSON file.
     """
 
-    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
     json_filepath.write_text(JSON_CONTENTS_WRONG_KEY)
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
-        patch.object(error_console, "print") as mock_print
+        patch.object(error_console, "print") as mock_print,
     ):
         queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
@@ -252,12 +251,12 @@ def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
     the effect should be similar to calling the funciton without a JSON file.
     """
 
-    json_filepath: Path = tmp_path/".imported_bookmarks.json"
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
     json_filepath.write_text(JSON_CONTENTS_WRONG_KEY)
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
-        patch.object(error_console, "print") as mock_print
+        patch.object(error_console, "print") as mock_print,
     ):
         queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
