@@ -17,6 +17,10 @@ would result in the REFERENCE_MARKDOWN document.
 * JSON_CONTENTS (str): Contents of a valid JSON file that keeps track of the bookmarks
 that have already been imported.
 
+* JSON_CONTENTS_WITH_EXTRA_ELEMENT (str): Contents of another valid JSON file that keeps
+track of the bookmarks. This file includes one more bookmark id than the one
+represented by `JSON_CONTENTS`.
+
 * WRONG_JSON_CONTENTS (str): Contents of a invalid JSON file.
 
 * JSON_CONTENTS_NO_DICT (str): Contents of a valid JSON file that doesn't contain a
@@ -33,6 +37,9 @@ bookmarks.
 
 * BOOKMARK_IDS_FROM_JSON (list[str]): The IDs of the bookmarks that correspond to the
 contents of `JSON_CONTENTS`.
+
+* BOOKMARK_IDS_FROM_JSON_WITH_EXTRA_ELEMENT (list[str]): The IDs of the bookmarks that
+correspond to the contents of `JSON_CONTENTS_WITH_EXTRA_ELEMENT`.
 
 * REFERENCE_MARKDOWN (list): A list of reference markdown text that results from
 importing the bookmarks in `BOOKMARKS_TO_ADD`. The list contains two markdown documents,
@@ -109,6 +116,16 @@ JSON_CONTENTS: str = (
     "]"
     "}"
 )
+JSON_CONTENTS_WITH_EXTRA_ELEMENT: str = (
+    "{"
+    '"imported_bookmark_ids": ['
+    '"11111111-1111-1111-1111-111111111111",'
+    '"11111111-1111-1111-1111-111111111112",'
+    '"11111111-1111-1111-1111-111111111113",'
+    '"11111111-1111-1111-1111-111111111114"'
+    "]"
+    "}"
+)
 WRONG_JSON_CONTENTS: str = (
     "{"
     '"imported_bookmark_ids": ['
@@ -138,6 +155,12 @@ BOOKMARK_IDS_FROM_JSON: list[str] = [
     "11111111-1111-1111-1111-111111111111",
     "11111111-1111-1111-1111-111111111112",
     "11111111-1111-1111-1111-111111111113",
+]
+BOOKMARK_IDS_FROM_JSON_WITH_EXTRA_ELEMENT: list[str] = [
+    "11111111-1111-1111-1111-111111111111",
+    "11111111-1111-1111-1111-111111111112",
+    "11111111-1111-1111-1111-111111111113",
+    "11111111-1111-1111-1111-111111111114",
 ]
 
 

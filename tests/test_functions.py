@@ -54,6 +54,7 @@ from .references import (
     JSON_CONTENTS_WRONG_KEY,
     JSON_CONTENTS_WRONG_VALUE,
     BOOKMARK_IDS_FROM_JSON,
+    BOOKMARK_IDS_FROM_JSON_WITH_EXTRA_ELEMENT,
     EXPECTED_BOOKMARKS_SQLITE,
 )
 from kobo_highlights.functions import (
@@ -137,6 +138,46 @@ def test_add_bookmark_to_md_existing(tmp_path):
 
         mocked_path_open.assert_called_once_with("a")
         mocked_path_open().write.assert_called_once_with(REFERENCE_MARKDOWN[1])
+
+
+def test_write_bookmark_id_to_json_new(tmp_path):
+    """Test that `write_bookmark_id_to_json()` adds the id to the JSON file if the id
+    is not already present.
+    """
+
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
+    json_filepath.write_text(JSON_CONTENTS)
+    new_id: str = "11111111-1111-1111-1111-111111111114"
+
+    assert json_filepath.is_file()
+    write_bookmark_id_to_json(json_filepath, new_id)
+
+    json_object_after_writing: dict = json.loads(json_filepath.read_text())
+    bookmark_ids_after_writing: list[str] = json_object_after_writing[
+        "imported_bookmark_ids"
+    ]
+
+    assert bookmark_ids_after_writing == BOOKMARK_IDS_FROM_JSON_WITH_EXTRA_ELEMENT
+
+
+def test_write_bookmark_id_to_json_existing(tmp_path):
+    """Test that `write_bookmark_id_to_json()` does't add the id to the JSON file if
+    the id is already present.
+    """
+
+    json_filepath: Path = tmp_path / ".imported_bookmarks.json"
+    json_filepath.write_text(JSON_CONTENTS)
+    existing_id: str = "11111111-1111-1111-1111-111111111113"
+
+    assert json_filepath.is_file()
+    write_bookmark_id_to_json(json_filepath, existing_id)
+
+    json_object_after_writing: dict = json.loads(json_filepath.read_text())
+    bookmark_ids_after_writing: list[str] = json_object_after_writing[
+        "imported_bookmark_ids"
+    ]
+
+    assert bookmark_ids_after_writing == BOOKMARK_IDS_FROM_JSON
 
 
 def test_query_bookmark_ids_from_json_correct(tmp_path):
