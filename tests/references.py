@@ -19,13 +19,13 @@ that have already been imported.
 
 * WRONG_JSON_CONTENTS (str): Contents of a invalid JSON file.
 
-* JSON_CONTENTS_NO_DICT(str): Contents of a valid JSON file that doesn't contain a
+* JSON_CONTENTS_NO_DICT (str): Contents of a valid JSON file that doesn't contain a
 dictionary (as it should).
 
-* JSON_CONTENTS_WRONG_KEY(str): Contents of a valid JSON file that contains a dictionary
+* JSON_CONTENTS_WRONG_KEY (str): Contents of a valid JSON file that contains a dictionary
 but it has the wrong key.
 
-* JSON_CONTENTS_WRONG_VALUR(str): Contents of a valid JSON file that contains a
+* JSON_CONTENTS_WRONG_VALUE (str): Contents of a valid JSON file that contains a
 dictionary with the right key, but without a list of IDs.
 
 * EMPTY_JSON_CONTENTS (str): Contents of a valid JSON file that doesn't hold any

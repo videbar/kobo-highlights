@@ -1,38 +1,38 @@
 """Tests for the functionality in `functions.py`:
 
-* test_query_bookmarks_from_ereader: Test the querying of bookmarks from the erader
+* test_query_bookmarks_from_ereader(): Test the querying of bookmarks from the erader
 sqlite database.
 
-* test_add_bookmark_to_md_new: Test adding a bookmark to a new markdown file.
+* test_add_bookmark_to_md_new(): Test adding a bookmark to a new markdown file.
 
-* test_add_bookmark_to_md_existing: Test adding a bookmark to an existing markdown
+* test_add_bookmark_to_md_existing(): Test adding a bookmark to an existing markdown
 file.
 
-* test_query_bookmark_ids_from_json_correct: Test that the bookmark ids are properly
+* test_query_bookmark_ids_from_json_correct(): Test that the bookmark ids are properly
 queried from the JSON file.
 
-* test_query_bookmark_ids_from_json_no_file: Test that an empty list is returned when
+* test_query_bookmark_ids_from_json_no_file(): Test that an empty list is returned when
 no JSON file exists and that a JSON file is created.
 
-* test_query_bookmark_ids_from_json_wrong_json: Test that, when the JSON file
+* test_query_bookmark_ids_from_json_wrong_json(): Test that, when the JSON file
 doesn't have a valid structure and the user agrees, an empty list is returned and a new
 empty file is created.
 
-* test_query_bookmark_ids_from_json_no_dict: Test that, when the JSON file
+* test_query_bookmark_ids_from_json_no_dict(): Test that, when the JSON file
 does have a valid structure but it doesn't represent a dictionary and the user agrees,
 an empty list is returned and a new empty file is created.
 
-* test_query_bookmark_ids_from_json_wrong_key: Test that, when the JSON file
+* test_query_bookmark_ids_from_json_wrong_key(): Test that, when the JSON file
 does have a valid structure, it does represent a dictionary, but the dictionary doesn't
 use the key `imported_bookmark_ids` and the user agrees, an empty list is returned and
 a new empty file is created.
 
-* test_query_bookmark_ids_from_json_wrong_value: Test that, when the JSON file
+* test_query_bookmark_ids_from_json_wrong_value(): Test that, when the JSON file
 does have a valid structure, it does represent a dictionary, the dictionary does
 use the key `imported_bookmark_ids`, but the value is not a list, and the user agrees,
 an empty list is returned and a new empty file is created.
 
-* test_setup_missing_config: Test the that a proper `Config` object is created when a
+* test_setup_missing_config(): Test the that a proper `Config` object is created when a
 config file doesn't exists.
 """
 
