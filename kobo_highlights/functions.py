@@ -200,12 +200,11 @@ def query_bookmark_ids_from_json(json_filepath: Path) -> list[Bookmark_id]:
         if not isinstance(json_content["imported_bookmark_ids"], list):
             raise TypeError()
 
-    # If no JSON file exists create one.
+    # If no JSON file exists, create one.
     except FileNotFoundError:
 
         json_content: dict[str, list[Bookmark_id]] = {"imported_bookmark_ids": []}
-        with json_filepath.open("w") as json_file:
-            json.dump(json_content, json_file)
+        json_filepath.write_text(json.dumps(json_content))
 
     # If there is a JSON file but the structure is wrong, the user will be asked if
     # they want to create a new one.
@@ -222,8 +221,7 @@ def query_bookmark_ids_from_json(json_filepath: Path) -> list[Bookmark_id]:
             console=error_console,
         ):
             json_content: dict[str, list[Bookmark_id]] = {"imported_bookmark_ids": []}
-            with json_filepath.open("w") as json_file:
-                json.dump(json_content, json_file)
+            json_filepath.write_text(json.dumps(json_content))
 
         else:
             raise typer.Abort()
@@ -244,8 +242,7 @@ def write_bookmark_id_to_json(json_filepath: Path, id: Bookmark_id):
     if id not in stored_ids:
         stored_ids.append(id)
 
-    with json_filepath.open("w") as json_file:
-        json.dump({"imported_bookmark_ids": stored_ids}, json_file)
+    json_filepath.write_text(json.dumps({"imported_bookmark_ids": stored_ids}))
 
 
 def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):

@@ -42,7 +42,7 @@ def setup():
     global CONFIG_PATH
     global config
     global SQLITE_PATH
-    global JSON_PATH 
+    global JSON_PATH
 
     APP_NAME: str = "kobo_highlights"
     APP_PATH = Path(typer.get_app_dir(APP_NAME))
@@ -78,7 +78,9 @@ def list_highlights(all: bool = typer.Option(False, help="Show all bookmarks")):
 
         # Filter the bookmark to print to include only those that are in the ereader
         # but not on the markdown files.
-        bookmarks_to_print = [bm for bm in bookmarks_to_print if bm["id"] not in md_bookmarks_ids]
+        bookmarks_to_print = [
+            bm for bm in bookmarks_to_print if bm["id"] not in md_bookmarks_ids
+        ]
 
         # Used for the table printed to the terminal.
         title_str: str = "New bookmarks in your ereader"
@@ -136,11 +138,15 @@ def import_highlights(
 
         case "new":
 
-            md_bookmarks_ids: list[Bookmark_id] = query_bookmark_ids_from_json(JSON_PATH)
+            md_bookmarks_ids: list[Bookmark_id] = query_bookmark_ids_from_json(
+                JSON_PATH
+            )
 
             # Filter the bookmark to print to include only those that are in the ereader
             # but not on the markdown files.
-            bookmarks_to_save = [bm for bm in ereader_bookmarks if bm["id"] not in md_bookmarks_ids]
+            bookmarks_to_save = [
+                bm for bm in ereader_bookmarks if bm["id"] not in md_bookmarks_ids
+            ]
 
             for bookmark in bookmarks_to_save:
                 add_bookmark_to_md(bookmark, config.target_dir)
@@ -208,16 +214,16 @@ def import_highlights(
                 )
 
 
-@config_app.command()
-def show():
+@config_app.command("show")
+def show_config():
     """Show the current program configuration."""
     global config
     console.print(Panel(config, expand=False))
 
 
-@config_app.command()
-def new():
-    """Create and save a new configuration interactively."""
+@config_app.command("new")
+def new_config():
+    """Create a new configuration interactively and save it."""
     global config
     global CONFIG_PATH
     config = Config.create_interactively().save_file(CONFIG_PATH)

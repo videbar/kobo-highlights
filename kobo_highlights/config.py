@@ -49,6 +49,7 @@ class Config(BaseModel, extra=Extra.forbid):
 
         ereader_dir (pathlib.Path): Path where the ereader is mounted.
     """
+
     target_dir: Path
     ereader_dir: Path
 
@@ -147,9 +148,7 @@ class Config(BaseModel, extra=Extra.forbid):
             field: str(path) for field, path in self.dict().items()
         }
 
-        with open(config_filepath, "w") as config_file:
-            toml.dump(toml_representation, config_file)
-
+        config_filepath.write_text(toml.dumps(toml_representation))
         return self
 
     def __rich__(self) -> Table:
