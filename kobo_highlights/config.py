@@ -148,7 +148,7 @@ class Config(BaseModel, extra=Extra.forbid):
             field: str(path) for field, path in self.dict().items()
         }
 
-        config_filepath.write_text(toml.dumps(toml_representation))
+        config_filepath.write_text(toml.dumps(toml_representation), encoding="utf-8")
         return self
 
     def __rich__(self) -> Table:

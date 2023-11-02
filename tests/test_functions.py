@@ -110,10 +110,9 @@ def test_add_bookmark_to_md_new(tmp_path):
         patch.object(Path, "write_text") as mock_write_text,
         patch.object(Path, "is_file", return_value=False),
     ):
-
         assert not filepath.is_file()
         add_bookmark_to_md(BOOKMARKS_TO_ADD[0], tmp_path)
-        mock_write_text.assert_called_once_with(REFERENCE_MARKDOWN[0])
+        mock_write_text.assert_called_once_with(REFERENCE_MARKDOWN[0], encoding="utf-8")
 
 
 def test_add_bookmark_to_md_existing(tmp_path):
@@ -132,11 +131,10 @@ def test_add_bookmark_to_md_existing(tmp_path):
         patch.object(Path, "open", mock_open()) as mocked_path_open,
         patch.object(Path, "is_file", return_value=True),
     ):
-
         assert filepath.is_file()
         add_bookmark_to_md(BOOKMARKS_TO_ADD[1], tmp_path)
 
-        mocked_path_open.assert_called_once_with("a")
+        mocked_path_open.assert_called_once_with("a", encoding="utf-8")
         mocked_path_open().write.assert_called_once_with(REFERENCE_MARKDOWN[1])
 
 
@@ -146,13 +144,15 @@ def test_write_bookmark_id_to_json_new(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS)
+    json_filepath.write_text(JSON_CONTENTS, encoding="utf-8")
     new_id: str = "11111111-1111-1111-1111-111111111114"
 
     assert json_filepath.is_file()
     write_bookmark_id_to_json(json_filepath, new_id)
 
-    json_object_after_writing: dict = json.loads(json_filepath.read_text())
+    json_object_after_writing: dict = json.loads(
+        json_filepath.read_text(encoding="utf-8")
+    )
     bookmark_ids_after_writing: list[str] = json_object_after_writing[
         "imported_bookmark_ids"
     ]
@@ -166,13 +166,15 @@ def test_write_bookmark_id_to_json_existing(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS)
+    json_filepath.write_text(JSON_CONTENTS, encoding="utf-8")
     existing_id: str = "11111111-1111-1111-1111-111111111113"
 
     assert json_filepath.is_file()
     write_bookmark_id_to_json(json_filepath, existing_id)
 
-    json_object_after_writing: dict = json.loads(json_filepath.read_text())
+    json_object_after_writing: dict = json.loads(
+        json_filepath.read_text(encoding="utf-8")
+    )
     bookmark_ids_after_writing: list[str] = json_object_after_writing[
         "imported_bookmark_ids"
     ]
@@ -187,11 +189,11 @@ def test_query_bookmark_ids_from_json_correct(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS)
+    json_filepath.write_text(JSON_CONTENTS, encoding="utf-8")
 
     assert json_filepath.is_file()
 
-    json.loads(json_filepath.read_text())
+    json.loads(json_filepath.read_text(encoding="utf-8"))
 
     queried_ids: list = query_bookmark_ids_from_json(json_filepath)
 
@@ -211,7 +213,7 @@ def test_query_bookmark_ids_from_json_no_file(tmp_path):
 
     assert queried_ids == []
     assert json_filepath.is_file()
-    assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+    assert json_filepath.read_text(encoding="utf-8") == EMPTY_JSON_CONTENTS
 
 
 def test_query_bookmark_ids_from_json_wrong_json(tmp_path):
@@ -222,7 +224,7 @@ def test_query_bookmark_ids_from_json_wrong_json(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(WRONG_JSON_CONTENTS)
+    json_filepath.write_text(WRONG_JSON_CONTENTS, encoding="utf-8")
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
@@ -233,7 +235,7 @@ def test_query_bookmark_ids_from_json_wrong_json(tmp_path):
         mock_print.assert_called_once()
         mock_ask.assert_called_once()
         assert queried_ids == []
-        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+        assert json_filepath.read_text(encoding="utf-8") == EMPTY_JSON_CONTENTS
 
 
 def test_query_bookmark_ids_from_json_no_dict(tmp_path):
@@ -245,7 +247,7 @@ def test_query_bookmark_ids_from_json_no_dict(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS_NO_DICT)
+    json_filepath.write_text(JSON_CONTENTS_NO_DICT, encoding="utf-8")
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
@@ -256,7 +258,7 @@ def test_query_bookmark_ids_from_json_no_dict(tmp_path):
         mock_print.assert_called_once()
         mock_ask.assert_called_once()
         assert queried_ids == []
-        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+        assert json_filepath.read_text(encoding="utf-8") == EMPTY_JSON_CONTENTS
 
 
 def test_query_bookmark_ids_from_json_wrong_key(tmp_path):
@@ -268,7 +270,7 @@ def test_query_bookmark_ids_from_json_wrong_key(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS_WRONG_KEY)
+    json_filepath.write_text(JSON_CONTENTS_WRONG_KEY, encoding="utf-8")
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
@@ -279,7 +281,7 @@ def test_query_bookmark_ids_from_json_wrong_key(tmp_path):
         mock_print.assert_called_once()
         mock_ask.assert_called_once()
         assert queried_ids == []
-        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+        assert json_filepath.read_text(encoding="utf-8") == EMPTY_JSON_CONTENTS
 
 
 def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
@@ -292,7 +294,7 @@ def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
     """
 
     json_filepath: Path = tmp_path / ".imported_bookmarks.json"
-    json_filepath.write_text(JSON_CONTENTS_WRONG_VALUE)
+    json_filepath.write_text(JSON_CONTENTS_WRONG_VALUE, encoding="utf-8")
 
     with (
         patch.object(Confirm, "ask", return_value=True) as mock_ask,
@@ -303,7 +305,7 @@ def test_query_bookmark_ids_from_json_wrong_value(tmp_path):
         mock_print.assert_called_once()
         mock_ask.assert_called_once()
         assert queried_ids == []
-        assert json_filepath.read_text() == EMPTY_JSON_CONTENTS
+        assert json_filepath.read_text(encoding="utf-8") == EMPTY_JSON_CONTENTS
 
 
 def test_setup_missing_config(tmp_path):
@@ -326,7 +328,6 @@ def test_setup_missing_config(tmp_path):
             Config, "create_interactively", return_value=reference_config
         ) as mock_create_interactively,
     ):
-
         return_config = setup_missing_config(config_filpath)
 
         assert reference_config == return_config

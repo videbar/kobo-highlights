@@ -49,7 +49,6 @@ def setup_missing_config(config_path: Path) -> Config:
 
     error_console.print("[bold]No valid configuration file was found")
     if Confirm.ask("would you like to create one?"):
-
         try:
             config = Config.create_interactively().save_file(config_path)
             console.print(
@@ -122,7 +121,6 @@ def query_bookmarks_from_ereader(
     all_bookmarks: list[Bookmark] = []
 
     for bookmark_data in cursor_bookmark.execute(BM_QUERY):
-
         current_bookmark: dict = {
             "id": bookmark_data[0],
             "text": bookmark_data[1].strip(),
@@ -188,9 +186,8 @@ def query_bookmark_ids_from_json(json_filepath: Path) -> list[Bookmark_id]:
         list[Bookmark_id]: List of bookamrk IDs.
     """
     try:
-
         json_content: dict[str, list[Bookmark_id]] = json.loads(
-            json_filepath.read_text()
+            json_filepath.read_text(encoding="utf-8")
         )
 
         # The JSON file should correspond to a dictionary with the key
@@ -202,9 +199,8 @@ def query_bookmark_ids_from_json(json_filepath: Path) -> list[Bookmark_id]:
 
     # If no JSON file exists, create one.
     except FileNotFoundError:
-
         json_content: dict[str, list[Bookmark_id]] = {"imported_bookmark_ids": []}
-        json_filepath.write_text(json.dumps(json_content))
+        json_filepath.write_text(json.dumps(json_content), encoding="utf-8")
 
     # If there is a JSON file but the structure is wrong, the user will be asked if
     # they want to create a new one.
@@ -221,7 +217,7 @@ def query_bookmark_ids_from_json(json_filepath: Path) -> list[Bookmark_id]:
             console=error_console,
         ):
             json_content: dict[str, list[Bookmark_id]] = {"imported_bookmark_ids": []}
-            json_filepath.write_text(json.dumps(json_content))
+            json_filepath.write_text(json.dumps(json_content), encoding="utf-8")
 
         else:
             raise typer.Abort()
@@ -242,7 +238,9 @@ def write_bookmark_id_to_json(json_filepath: Path, id: Bookmark_id):
     if id not in stored_ids:
         stored_ids.append(id)
 
-    json_filepath.write_text(json.dumps({"imported_bookmark_ids": stored_ids}))
+    json_filepath.write_text(
+        json.dumps({"imported_bookmark_ids": stored_ids}), encoding="utf-8"
+    )
 
 
 def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):
@@ -283,8 +281,8 @@ def add_bookmark_to_md(bookmark: Bookmark, md_dir: Path):
         text_existing_file: str = f"\n\n***\n\n{md_blockquote}"
 
     if md_filepath.is_file():
-        with md_filepath.open("a") as md_file:
+        with md_filepath.open("a", encoding="utf-8") as md_file:
             md_file.write(text_existing_file)
 
     else:
-        md_filepath.write_text(text_new_file)
+        md_filepath.write_text(text_new_file, encoding="utf-8")

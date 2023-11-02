@@ -28,6 +28,7 @@ from .references import (
     CONFIG_FILE_MISSING_FIELDS,
 )
 
+
 # Tests
 def test_from_file_correct(tmp_path):
     """Test the `from_file()` method with a valid config file. This is done using the
@@ -36,7 +37,7 @@ def test_from_file_correct(tmp_path):
     """
 
     config_filepath: Path = tmp_path / "config.toml"
-    config_filepath.write_text(CONFIG_FILE_CORRECT)
+    config_filepath.write_text(CONFIG_FILE_CORRECT, encoding="utf-8")
 
     target_dir = Path(CONFIG_FILE_CORRECT_PATHS["target_dir"])
     ereader_dir = Path(CONFIG_FILE_CORRECT_PATHS["ereader_dir"])
@@ -54,7 +55,7 @@ def test_from_file_extra_fields(tmp_path):
     """
 
     config_filepath: Path = tmp_path / "config.toml"
-    config_filepath.write_text(CONFIG_FILE_EXTRA_FIELDS)
+    config_filepath.write_text(CONFIG_FILE_EXTRA_FIELDS, encoding="utf-8")
 
     assert config_filepath.is_file()
     with pytest.raises(ConfigError):
@@ -67,7 +68,7 @@ def test_from_file_missing_fields(tmp_path):
     """
 
     config_filepath: Path = tmp_path / "config.toml"
-    config_filepath.write_text(CONFIG_FILE_MISSING_FIELDS)
+    config_filepath.write_text(CONFIG_FILE_MISSING_FIELDS, encoding="utf-8")
 
     assert config_filepath.is_file()
     with pytest.raises(ConfigError):
@@ -76,7 +77,7 @@ def test_from_file_missing_fields(tmp_path):
 
 def test_from_file_no_file(tmp_path):
     """Test the `from_file()` method when there's no config file at all. If the path
-    passed to `from_file()` does not contain a file, it should raise a `ConfigError`. 
+    passed to `from_file()` does not contain a file, it should raise a `ConfigError`.
     """
 
     config_filepath: Path = tmp_path / "config.toml"
