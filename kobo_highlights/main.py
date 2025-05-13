@@ -1,6 +1,7 @@
 """This module contains the typer app (the CLI app) and the definitions for all the
 programs commands.
 """
+
 # Imports:
 from pathlib import Path
 
@@ -33,6 +34,7 @@ app = typer.Typer(
 # config subcommands:
 config_app = typer.Typer(help="Manage the program configuration.")
 app.add_typer(config_app, name="config")
+
 
 # Initial setup:
 @app.callback()
@@ -142,8 +144,8 @@ def import_highlights(
                 JSON_PATH
             )
 
-            # Filter the bookmark to print to include only those that are in the ereader
-            # but not on the markdown files.
+            # Filter the bookmarks to import only those that are in the ereader but
+            # not on the markdown files.
             bookmarks_to_save = [
                 bm for bm in ereader_bookmarks if bm["id"] not in md_bookmarks_ids
             ]
@@ -157,13 +159,14 @@ def import_highlights(
         case "all":
             for bookmark in ereader_bookmarks:
                 add_bookmark_to_md(bookmark, config.target_dir)
+                write_bookmark_id_to_json(JSON_PATH, bookmark["id"])
 
             console.print("[cyan]All Bookmarks have been imported")
 
         case _:
 
-            # If the value is neither all nor new, the program checks in order if it is
-            # a id, or a list of ids, a book title or a book author.
+            # If the value is neither all nor new, the program checks in order to see if
+            # it is an id, a list of ids, a book title, or a book author.
 
             all_ids, all_titles, all_authors = [], [], []
 
@@ -172,13 +175,14 @@ def import_highlights(
                 all_titles.append(bookmark["title"])
                 all_authors.append(bookmark["author"])
 
-            # Check first if it is a list of ids:
+            # Check first if the input is composed of ids:
             selected_ids: list = bookmark_selection.split()
             if all(id in all_ids for id in selected_ids):
 
                 for bookmark in ereader_bookmarks:
                     if bookmark["id"] in selected_ids:
                         add_bookmark_to_md(bookmark, config.target_dir)
+                        write_bookmark_id_to_json(JSON_PATH, bookmark["id"])
 
                 # To print to the console:
                 id_list_to_print: str = "\n".join(selected_ids)
@@ -192,6 +196,7 @@ def import_highlights(
                 for bookmark in ereader_bookmarks:
                     if bookmark["title"] == bookmark_selection:
                         add_bookmark_to_md(bookmark, config.target_dir)
+                        write_bookmark_id_to_json(JSON_PATH, bookmark["id"])
                 console.print(
                     f"[green]All bookmarks from the book {bookmark_selection} have"
                     " been imported"
@@ -202,6 +207,7 @@ def import_highlights(
                 for bookmark in ereader_bookmarks:
                     if bookmark["author"] == bookmark_selection:
                         add_bookmark_to_md(bookmark, config.target_dir)
+                        write_bookmark_id_to_json(JSON_PATH, bookmark["id"])
                 console.print(
                     f"[green]All bookmarks from the Author {bookmark_selection} have"
                     " been imported"
