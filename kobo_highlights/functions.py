@@ -144,13 +144,12 @@ def query_bookmarks_from_ereader(
 
         # Query string used on the "content" table.
         CONTENT_QUERY: str = (
-            f"SELECT Title, Attribution FROM content WHERE ContentID = '{volume_id}'"
-            " AND ContentType = '6' LIMIT 1;"
+            "SELECT Title, Attribution FROM content WHERE ContentID = ? AND ContentType = '6' LIMIT 1;"
         )
 
         # The same book can appear multiple times on the "content" table, but in order
         # to retrieve the data there's no need to query more than one result.
-        content_query_result: tuple = cursor_content.execute(CONTENT_QUERY).fetchone()
+        content_query_result: tuple = cursor_content.execute(CONTENT_QUERY, (volume_id,)).fetchone()
 
         current_bookmark["title"] = content_query_result[0]
 
