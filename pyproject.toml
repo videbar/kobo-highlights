@@ -1,4 +1,4 @@
-[tool.poetry]
+[project]
 name = "kobo-highlights"
 version = "1.0.3"
 description = """\
@@ -6,7 +6,7 @@ description = """\
     It can import them into a human-friendly markdown database.\
     """
 license = "GPL-3.0-only"
-authors = ["Pedro Videgain Barranco"]
+authors = [{ name = "Pedro Videgain Barranco", email = "pedro@vide.bar" }]
 readme = "README.md"
 homepage = "https://github.com/videbar/kobo-highlights"
 classifiers = [
@@ -14,20 +14,18 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Topic :: Multimedia",
 ]
+scripts = { kh = "kobo_highlights.main:app" }
+requires-python = "~=3.10"
+dependencies = [
+    "toml~=0.10.2",
+    "pydantic~=2.0",
+    "rich~=12.4.0",
+    "typer[all] (~=0.4.1)",
+]
 
-[tool.poetry.scripts]
-kh = "kobo_highlights.main:app"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-typer = {extras = ["all"], version = "^0.4.1"}
-toml = "^0.10.2"
-pydantic = "^1.9.0"
-rich = "^12.2.0"
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.1"
-black = "^22.3.0"
+[tool.poetry.group.dev]
+dependencies = { pytest = "~=7.1", black = "~=22.3.0" }
+optional = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

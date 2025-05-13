@@ -15,7 +15,7 @@ but a valid `Config` object can't be created.
 from __future__ import annotations
 from pathlib import Path
 
-from pydantic import BaseModel, Extra, ValidationError
+from pydantic import BaseModel, ValidationError
 from rich.prompt import Prompt
 from rich.table import Table
 import toml
@@ -24,7 +24,7 @@ from kobo_highlights.console import console
 
 
 # Definitions
-class Config(BaseModel, extra=Extra.forbid):
+class Config(BaseModel, extra="forbid"):
     """
     Config: Class that holds the configuration of the program. It is based on pydantic
     to ensure a correct structure and facilitate parsing. It used as a singleton in the
@@ -74,7 +74,7 @@ class Config(BaseModel, extra=Extra.forbid):
             Config: `Config` object representing the config file.
         """
         try:
-            return cls.parse_obj(toml.load(config_path))
+            return cls.model_validate(toml.load(config_path))
 
         except FileNotFoundError:
             raise ConfigError(f"No config file was found in: {config_path}")
@@ -145,7 +145,7 @@ class Config(BaseModel, extra=Extra.forbid):
         """
         # Convert the path attributes to strings:
         toml_representation: dict[str, str] = {
-            field: str(path) for field, path in self.dict().items()
+            field: str(path) for field, path in self.model_dump().items()
         }
 
         config_filepath.parent.mkdir(parents=True, exist_ok=True)
