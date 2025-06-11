@@ -225,7 +225,7 @@ def show_config():
     """Show the current program configuration."""
     global config
     console.print(Panel(config, expand=False))
-    print("Configuration file path:", CONFIG_PATH)
+    console.print("[yellow]Configuration file path:", CONFIG_PATH)
 
 
 @config_app.command("new")
