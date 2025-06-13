@@ -1,7 +1,7 @@
 **DISCLAIMER:** This is an unofficial project that I developed independently from Kobo
 and without any contact with them.
 
-# Kobo highlights 
+# Kobo highlights
 
 Kobo highlights is a simple CLI application to manage bookmarks from a Kobo erader. It
 can import them into a markdown database where they can be easily accessed.
@@ -64,7 +64,7 @@ explained in more detail.
 # Configuration
 
 Kobo Highlights uses a [toml](https://github.com/toml-lang/toml) configuration file that
-is stored in the default directory 
+is stored in the default directory
 [designated by Typer](https://typer.tiangolo.com/tutorial/app-dir/). In most Linux
 systems this is in `~/.config/kobo_highlights`. The configuration file contains two
 fields:
@@ -78,12 +78,12 @@ your bookmarks.
 database to be created. This database will contain one markdown file per book with
 the highlighted text stored in block quotes.
 
-Evert time you run Kobo Highlights it will try to find a configuration file, if it
+Every time you run Kobo Highlights it will try to find a configuration file, if it
 fails, it will ask you if you want to create one interactively and save it. If you
 don't want to create a configuration file, Kobo Highlights will stop.
 
 You can manage your configuration file with the `kh config` command. In particular
-you cant use `config show` to show your current configuration and `config new` to
+you can use `config show` to show your current configuration and `config new` to
 create and save a new configuration.
 
 # The markdown database
@@ -104,5 +104,5 @@ database. To determine if a bookmark is already in the database, Kobo highlights
 a hidden JSON file inside the markdown directory. Inside this hidden file Kobo
 Highlights stores the IDs of the bookmarks that have already been imported. This means
 that even if you modify the markdown files (or even delete the completely), Kobo
-Highlights will  remember that bookmarks that you had imported and they will not be
+Highlights will remember that bookmarks that you had imported and they will not be
 considered new.
