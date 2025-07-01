@@ -1,3 +1,8 @@
+# Run the command: `kh config new` to generate a config file, which
+# will be placed in the application directory provided by Typer.
+# See: https://typer.tiangolo.com/tutorial/app-dir
+# The `kh config show` cmd will also display the path to the config file.
+
 # Directory where your highlights will be exported:
 target_dir = "/path/to/the/markdown/database/directory"
 

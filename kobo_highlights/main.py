@@ -225,6 +225,7 @@ def show_config():
     """Show the current program configuration."""
     global config
     console.print(Panel(config, expand=False))
+    console.print("[yellow]Configuration file path:", CONFIG_PATH)
 
 
 @config_app.command("new")
@@ -233,4 +234,4 @@ def new_config():
     global config
     global CONFIG_PATH
     config = Config.create_interactively().save_file(CONFIG_PATH)
-    console.print("[green]Configuration file created successfully")
+    console.print("[green]Configuration file created successfully to ", CONFIG_PATH)
